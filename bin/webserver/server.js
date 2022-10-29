@@ -4,6 +4,7 @@ const bodyParser = require('body-parser')
 const app = express()
 const db = require('./app/queries')
 const api = require('./app/APIs')
+const op = require('./app/OverpassAPI')
 const port = 3000
 
 /*app.use(basicAuth({
@@ -17,6 +18,8 @@ app.use(
     extended: true,
   })
 )
+app.get('/locations', op.getLocations)
+app.get('/events', api.getVilniusEvents)
 app.get('/weather', api.getWeather)
 app.get('/users', db.getUsers)
 app.get('/users/:id', db.getUserById)
