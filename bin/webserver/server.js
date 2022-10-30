@@ -2,9 +2,10 @@ const express = require('express')
 const basicAuth = require('express-basic-auth')
 const bodyParser = require('body-parser')
 const app = express()
-const db = require('./app/DatabaseQueries')
+const db = require('./app/databaseQueries')
 const api = require('./app/APIs')
-const op = require('./app/OverpassAPI')
+const score = require('./app/algorithm')
+const test = require('./testing')
 const port = 3000
 
 /*app.use(basicAuth({
@@ -18,7 +19,9 @@ app.use(
     extended: true,
   })
 )
-app.get('/locations', op.getLocations)
+app.get('/test', test.testConnections)
+app.get('/score', score.getScore)
+app.get('/locations', api.getLocations)
 app.get('/events', api.getVilniusEvents)
 app.get('/weather', api.getWeather)
 app.get('/users', db.getUsers)

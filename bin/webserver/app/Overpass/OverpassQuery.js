@@ -19,11 +19,6 @@ class OverpassQuery {
 		this.elements2.push(elementString2);
 		return this;
 	}
-	addElement3({ type, tags = [], bbox }) {
-		const elementString3 = `${type}${tags.map(tag => `[${tag.key}${tag.not ? '!=' : '='}${tag.value}](area.searchArea)`)}`;
-		this.elements3.push(elementString3);
-		return this;
-	}
 	setFormat(format) {
 		this.format = format;
 		return this;
@@ -33,12 +28,11 @@ class OverpassQuery {
 		return this;
 	}
 	get query() {
-		return `${mainURL}[out:${this.format}][timeout:${this.timeout}];area(id:3600072596)->.searchArea;(${this.elements1.join(';')};${this.elements2.join(';')};${this.elements3.join(';')};);out body;>;out skel qt;`;
+		return `${mainURL}[out:${this.format}][timeout:${this.timeout}];area(id:3600072596)->.searchArea;(${this.elements1.join(';')};${this.elements2.join(';')};);out body;>;out skel qt;`;
 	}
 	async fetch() {
 		if (this.elements1.length == 0) throw new Error('No elements specified!');
 		if (this.elements2.length == 0) throw new Error('No elements specified!');
-		if (this.elements3.length == 0) throw new Error('No elements specified!');
 		const response = await nodefetch(this.query);
 		return JSON.parse(JSON.stringify(await (response).json()));
 	}
