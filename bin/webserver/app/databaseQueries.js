@@ -16,7 +16,7 @@ const Project = {
     
 }
 JSON.stringify();
-    response.status(200).json({armis, Users: results.rows})
+    response.status(200).json({Project, Users: results.rows})
   })
 }
 
