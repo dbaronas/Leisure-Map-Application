@@ -6,6 +6,7 @@ const db = require('./app/databaseQueries')
 const api = require('./app/APIs')
 const score = require('./app/algorithm')
 const test = require('./testing')
+const city = require('./app/cities')
 const port = 3000
 
 /*app.use(basicAuth({
@@ -19,6 +20,8 @@ app.use(
     extended: true,
   })
 )
+
+app.get('/cities', city.putCities)
 app.get('/test', test.testConnections)
 app.get('/score', score.getScore)
 app.get('/locations', api.getLocations)
