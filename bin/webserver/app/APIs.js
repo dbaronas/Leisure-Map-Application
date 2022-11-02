@@ -1,15 +1,18 @@
 const request = require('request')
 const overpass = require('./overpass/export')
 const nodefetch = require('node-fetch');
+const queryString = require('querystring')
 
 const getWeather = (req, res) => {
   const city = req.query.city
-  request('https://api.meteo.lt/v1/places/' + city + '/forecasts/long-term', (error, response, data) => {
+  const url = 'https://api.meteo.lt/v1/places/' + city + '/forecasts/long-term'
+  const encoded = encodeURI(url)
+  request(encoded, (error, response, data) => {
     if (!error && response.statusCode == 200) {
       var parsedData = JSON.parse(data)
       res.send(parsedData)
     }
-    if(response.statusCode == 404){
+    else{
         const error = {
             code: "404",
             message: "Not Found",
@@ -18,6 +21,8 @@ const getWeather = (req, res) => {
         res.json({error: error})
     }
   })
+
+
 }
 
 const getVilniusEvents = (req, res) => {
