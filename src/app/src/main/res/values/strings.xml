@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">Leisure Map</string>
+    <string name="find_activities">Find Activities</string>
+    <string name="map">Map</string>
+    <string name="main_menu">Main Menu</string>
+    <string name="preferences">Choose preferences</string>
+    <string name="sign_in_sign_up">Sign In / Sign Up</string>
+    <string name="our_recommendations">Our Recommendations</string>
+    <string name="back">Back</string>
+    <string name="sign_in">Sign In</string>
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="email">Email</string>
+    <string name="search">Search</string>
+</resources>
