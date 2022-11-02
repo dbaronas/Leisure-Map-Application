@@ -6,7 +6,7 @@ const db = require('./app/databaseQueries')
 const api = require('./app/APIs')
 const score = require('./app/algorithm')
 const test = require('./testing')
-const city = require('./app/cities')
+const overpass = require('./app/updateOverpass')
 const port = 3000
 
 /*app.use(basicAuth({
@@ -21,14 +21,13 @@ app.use(
   })
 )
 
-app.get('/cities', city.putCities)
-app.get('/test', test.testConnections)
+app.get('/update/overpassapi', overpass.updateAPI)
+app.get('/testconnections', test.testConnections)
 app.get('/score', score.getScore)
 app.get('/locations', api.getLocations)
 app.get('/events', api.getVilniusEvents)
 app.get('/weather', api.getWeather)
-app.get('/users', db.getUsers)
-app.get('/users/:id', db.getUserById)
+app.get('/table', db.getTable)
 app.post('/users', db.createUser)
 app.put('/users/:id', db.updateUser)
 app.delete('/users/:id', db.deleteUser)

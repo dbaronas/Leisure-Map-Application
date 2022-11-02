@@ -6,7 +6,8 @@ const getWeather = (req, res) => {
   const city = req.query.city
   request('https://api.meteo.lt/v1/places/' + city + '/forecasts/long-term', (error, response, data) => {
     if (!error && response.statusCode == 200) {
-      res.send(data)
+      var parsedData = JSON.parse(data)
+      res.send(parsedData)
     }
     if(response.statusCode == 404){
         const error = {
@@ -22,7 +23,8 @@ const getWeather = (req, res) => {
 const getVilniusEvents = (req, res) => {
   request('https://www.vilnius-events.lt/api/', (error, response, data) => {
     if (!error && response.statusCode == 200) {
-      res.send(data)
+      var parsedData = JSON.parse(data)
+      res.send(parsedData)
     }
   })
 }
