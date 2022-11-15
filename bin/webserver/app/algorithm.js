@@ -2,13 +2,13 @@ const getScore = (req, res) => {
     var distanceScore = parseFloat(req.query.distance)
     var reviewScore = parseFloat(req.query.reviewScore)
     var isPreffered = parseInt(req.query.isPreffered)
-    var isBusy = parseInt(req.query.isBusy)
+    var isOpen = parseInt(req.query.isOpen)
 
-    if(25 / distanceScore > 25){
-        distanceScore = 25
+    if(50 / distanceScore > 50){
+        distanceScore = 50
     }
     
-    const score = distanceScore + (reviewScore * 10) + (isPreffered * 10) + (Math.abs(isBusy - 1) * 10)
+    const score = (50 / distanceScore) + (reviewScore * 2) + (isPreffered * 10) + (isOpen * 30)
     
     res.json({Score: parseFloat(score.toFixed(2))})
 }

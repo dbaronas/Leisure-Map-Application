@@ -3,7 +3,7 @@ const request = require('request')
 const pool = new Pool({
   user: 'admin',
   host: '193.219.91.103',
-  port: 4956,
+  port: 9170,
   database: 'pblDB',
   password: 'admin'
 })
@@ -20,7 +20,8 @@ pool.query('SELECT 1+1 AS solution', (error) =>{
         Connections.Database = 'Connection with database was successful'
     }
     else{
-    Connections.Database = 'Connection with database was unsuccessful'
+        console.log(error)
+        Connections.Database = 'Connection with database was unsuccessful'
     }
 })
 
