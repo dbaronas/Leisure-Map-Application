@@ -1,4 +1,14 @@
 <resources>
+    <string-array name="distance_array">
+        <item>&lt; 1 km</item>
+        <item>&lt; 3 km</item>
+        <item>&lt; 5 km</item>
+        <item>&lt; 10 km</item>
+        <item>&lt; 20 km</item>
+        <item>&lt; 50 km</item>
+        <item>&lt; 100 km</item>
+        <item>&gt; 100 km</item>
+    </string-array>
     <string name="app_name">Leisure Map</string>
     <string name="find_activities">Find Activities</string>
     <string name="map">Map</string>
@@ -13,4 +23,5 @@
     <string name="sign_up">Sign Up</string>
     <string name="email">Email</string>
     <string name="search">Search</string>
+    <string name="forgot_password">Forgot Password</string>
 </resources>

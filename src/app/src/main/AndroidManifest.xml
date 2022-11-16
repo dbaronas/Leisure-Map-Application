@@ -61,6 +61,20 @@
                 android:value="" />
         </activity>
         <activity
+            android:name=".SignUp"
+            android:exported="false">
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
+        <activity
+            android:name=".ForgotPassword"
+            android:exported="false">
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
+        <activity
             android:name=".MainMenu"
             android:exported="true">
             <intent-filter>

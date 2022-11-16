@@ -18,4 +18,26 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.9" />
 
+    <Spinner
+        android:id="@+id/spinner1"
+        android:layout_width="200dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="45dp"
+        android:background="@drawable/pop_up_style"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.496"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/textView11"
+        android:layout_width="200dp"
+        android:layout_height="20dp"
+        android:layout_marginTop="20dp"
+        android:text="Choose distance"
+        android:textAlignment="center"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

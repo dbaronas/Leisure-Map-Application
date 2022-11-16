@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Login">
+    tools:context=".SignUp">
 
     <TextView
         android:id="@+id/textView"
@@ -12,7 +12,7 @@
         android:layout_height="57dp"
         android:layout_marginTop="100dp"
         android:gravity="center_vertical|left"
-        android:text="@string/sign_in"
+        android:text="@string/sign_up"
         android:textSize="28sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.15"
@@ -45,6 +45,32 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/username" />
 
+    <TextView
+        android:id="@+id/email"
+        android:layout_width="111dp"
+        android:layout_height="30dp"
+        android:layout_marginTop="56dp"
+        android:gravity="center_vertical|left"
+        android:text="@string/email"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.15"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/password" />
+
+    <TextView
+        android:id="@+id/guide"
+        android:layout_width="340dp"
+        android:layout_height="30dp"
+        android:layout_marginTop="5dp"
+        android:gravity="center_vertical|center_horizontal"
+        android:text=""
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.495"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/inputEmail" />
+
     <EditText
         android:id="@+id/inputUsername"
         android:layout_width="wrap_content"
@@ -61,56 +87,23 @@
         app:layout_constraintStart_toStartOf="@+id/password"
         app:layout_constraintTop_toBottomOf="@+id/password" />
 
-    <Button
-        android:id="@+id/forgotPass"
-        android:layout_width="170dp"
-        android:layout_height="32dp"
-        android:layout_marginTop="5dp"
-        android:background="@android:color/transparent"
-        android:text="@string/forgot_password"
-        android:textColor="#808080"
-        android:textSize="10sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.497"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/guide" />
-
-    <Button
-        android:id="@+id/signUp"
-        android:layout_width="170dp"
-        android:layout_height="32dp"
-        android:layout_marginTop="0dp"
-        android:background="@android:color/transparent"
-        android:text="Create an account"
-        android:textColor="#808080"
-        android:textSize="10sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.497"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/forgotPass" />
+    <EditText
+        android:id="@+id/inputEmail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="15"
+        app:layout_constraintStart_toStartOf="@+id/email"
+        app:layout_constraintTop_toBottomOf="@+id/email" />
 
     <Button
         android:id="@+id/signIn"
         android:layout_width="170dp"
         android:layout_height="50dp"
         android:layout_marginTop="5dp"
-        android:text="@string/sign_in"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/signUp" />
-
-    <TextView
-        android:id="@+id/guide"
-        android:layout_width="340dp"
-        android:layout_height="30dp"
-        android:layout_marginTop="5dp"
-        android:gravity="center_vertical|center_horizontal"
-        android:text=""
-        android:textSize="14sp"
+        android:text="@string/sign_up"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.495"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/inputPassword" />
+        app:layout_constraintTop_toBottomOf="@+id/guide" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

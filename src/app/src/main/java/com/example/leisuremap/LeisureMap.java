@@ -10,9 +10,6 @@ import android.location.Geocoder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
-import android.widget.Adapter;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.Toast;
 
@@ -47,16 +44,11 @@ import java.util.Objects;
 public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback {
 
     GoogleMap gMap;
+    private static final String TAG = LeisureMap.class.getSimpleName();
     SupportMapFragment mapFragment;
     SearchView searchView;
-    ListView listView;
-    private static final String TAG = LeisureMap.class.getSimpleName();
     List<Marker> cityMarkers = new ArrayList<>();
     List<Marker> museumMarkers = new ArrayList<>();
-    ArrayList<String> arrayList = new ArrayList<>();
-
-    ArrayAdapter<String> adapter;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,27 +64,15 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
         searchView.setQueryHint("Type here to search");
         mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
+    }
 
-
-        listView = findViewById(R.id.list_view);
-        Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-
-            @Override
-            public void run() {
-                adapter = new ArrayAdapter<String>(LeisureMap.this,
-                        android.R.layout.simple_list_item_1, arrayList);
-                listView.setAdapter(adapter);
-                for (String arrayList : arrayList ){
-                    System.out.println(arrayList);
-                }
-            }
-        }, 10000);
+    private void pointToPosition(LatLng position) {
+        CameraPosition cameraPosition = new CameraPosition.Builder().target(position).zoom(18).build();
+        gMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
     }
 
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
-        
         gMap = googleMap;
         LatLngBounds bounds = new LatLngBounds(
                 new LatLng(53.8967893, 20.653783), // SW bounds
@@ -114,25 +94,26 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
         }
 
         RequestQueue queue_museums = Volley.newRequestQueue(LeisureMap.this);
-        String url_museums = "https://overpass-api.de/api/interpreter?data=%2F*%0AThis%20has%20been%20generated%20by%20the%20overpass-turbo%20wizard.%0AThe%20original%20search%20was%3A%0A%E2%80%9Ctourism%3Dmuseum%20in%20lithuania%E2%80%9D%0A*%2F%0A%5Bout%3Ajson%5D%5Btimeout%3A25%5D%3B%0A%2F%2F%20fetch%20area%20%E2%80%9Clithuania%E2%80%9D%20to%20search%20in%0Aarea%28id%3A3600072596%29-%3E.searchArea%3B%0A%2F%2F%20gather%20results%0A%28%0A%20%20%2F%2F%20query%20part%20for%3A%20%E2%80%9Ctourism%3Dmuseum%E2%80%9D%0A%20%20node%5B%22tourism%22%3D%22museum%22%5D%28area.searchArea%29%3B%0A%20%20way%5B%22tourism%22%3D%22museum%22%5D%28area.searchArea%29%3B%0A%20%20relation%5B%22tourism%22%3D%22museum%22%5D%28area.searchArea%29%3B%0A%29%3B%0A%2F%2F%20print%20results%0Aout%20body%3B%0A%3E%3B%0Aout%20skel%20qt%3B";
-        //String url_museums = "http://193.219.91.104:1254/locations?key=tourism&value=museum";
+        //String url_museums = "https://overpass-api.de/api/interpreter?data=%2F*%0AThis%20has%20been%20generated%20by%20the%20overpass-turbo%20wizard.%0AThe%20original%20search%20was%3A%0A%E2%80%9Ctourism%3Dmuseum%20in%20lithuania%E2%80%9D%0A*%2F%0A%5Bout%3Ajson%5D%5Btimeout%3A25%5D%3B%0A%2F%2F%20fetch%20area%20%E2%80%9Clithuania%E2%80%9D%20to%20search%20in%0Aarea%28id%3A3600072596%29-%3E.searchArea%3B%0A%2F%2F%20gather%20results%0A%28%0A%20%20%2F%2F%20query%20part%20for%3A%20%E2%80%9Ctourism%3Dmuseum%E2%80%9D%0A%20%20node%5B%22tourism%22%3D%22museum%22%5D%28area.searchArea%29%3B%0A%20%20way%5B%22tourism%22%3D%22museum%22%5D%28area.searchArea%29%3B%0A%20%20relation%5B%22tourism%22%3D%22museum%22%5D%28area.searchArea%29%3B%0A%29%3B%0A%2F%2F%20print%20results%0Aout%20body%3B%0A%3E%3B%0Aout%20skel%20qt%3B";
+        String url_museums = "http://193.219.91.104:1254/table?name=locations";
         JsonObjectRequest request_museusm = new JsonObjectRequest(Request.Method.GET, url_museums, null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
                 try {
-                    JSONArray array = response.getJSONArray("elements");
+                    //JSONArray array = response.getJSONArray("elements");
+                    JSONArray array = response.getJSONArray("Table");
                     for(int i = 0; i < array.length(); i++) {
                         JSONObject element = (JSONObject) array.get(i);
                         String latitude = element.get("lat").toString();
                         String longitude = element.get("lon").toString();
-                        JSONObject obj = (JSONObject) element.get("tags");
-                        String objName = obj.get("name").toString();
+                        String objName = element.get("name").toString();
+                        //JSONObject obj = (JSONObject) element.get("tags");
+                        //String objName = obj.get("name").toString();
                         double lon = Double.valueOf(longitude);
                         double lat = Double.valueOf(latitude);
                         Marker marker = gMap.addMarker(new MarkerOptions().position(new LatLng(lat, lon)).title(objName).snippet("Museum").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
                         marker.setVisible(false);
                         museumMarkers.add(marker);
-                        arrayList.add(objName);
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -148,32 +129,26 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
         queue_museums.add(request_museusm);
 
         RequestQueue queue_cities = Volley.newRequestQueue(LeisureMap.this);
-        String url_cities = "https://overpass-api.de/api/interpreter?data=[out:json][timeout:25];area(id:3600072596)-%3E.searchArea;(node[%22place%22=%22city%22](area.searchArea);way[%22place%22=%22city%22](area.searchArea);relation[%22place%22=%22city%22](area.searchArea););out%20body;%3E;out%20skel%20qt;";
-        //String url_cities = "http://193.219.91.104:1254/table?name=cities";
+        //String url_cities = "https://overpass-api.de/api/interpreter?data=[out:json][timeout:25];area(id:3600072596)-%3E.searchArea;(node[%22place%22=%22city%22](area.searchArea);way[%22place%22=%22city%22](area.searchArea);relation[%22place%22=%22city%22](area.searchArea););out%20body;%3E;out%20skel%20qt;";
+        String url_cities = "http://193.219.91.104:1254/table?name=cities";
         JsonObjectRequest request_cities = new JsonObjectRequest(Request.Method.GET, url_cities, null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
                 try {
-
-                    //JSONArray array = response.getJSONArray("Table");
-                    JSONArray array = response.getJSONArray("elements");
+                    JSONArray array = response.getJSONArray("Table");
+                    //JSONArray array = response.getJSONArray("elements");
                     for(int i = 0; i < array.length(); i++) {
                         JSONObject element = (JSONObject) array.get(i);
                         String latitude = element.get("lat").toString();
                         String longitude = element.get("lon").toString();
-                        //String cityName = element.get("name").toString();
-                        JSONObject obj = (JSONObject) element.get("tags");
-                        String cityName = obj.get("name").toString();
+                        String cityName = element.get("name").toString();
+                        //JSONObject obj = (JSONObject) element.get("tags");
+                        //String cityName = obj.get("name").toString();
                         double lon = Double.valueOf(longitude);
                         double lat = Double.valueOf(latitude);
                         Marker marker = gMap.addMarker(new MarkerOptions().position(new LatLng(lat, lon)).title(cityName).snippet("City").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));
                         marker.setVisible(false);
                         cityMarkers.add(marker);
-                        arrayList.add(cityName);
-
-//                        String cities_Names = cityName;
-//                        System.out.println(i + " miesto pavadinimai" + cities_Names);
-
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -208,8 +183,8 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
                 if(Objects.equals(snip, "City"))
                 {
                     RequestQueue queue = Volley.newRequestQueue(LeisureMap.this);
-                    //String url ="http://193.219.91.104:1254/weather?city=" + city;
-                    String url ="https://api.meteo.lt/v1/places/" + city + "/forecasts/long-term";
+                    String url ="http://193.219.91.104:1254/weather?city=" + city;
+                    //String url ="https://api.meteo.lt/v1/places/" + city + "/forecasts/long-term";
 
                     JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
                         @Override
@@ -278,10 +253,8 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
                         }
                     }
                 }
-                adapter.getFilter().filter(s);
                 return false;
             }
-
             private void pointToPosition(LatLng position) {
                 CameraPosition cameraPosition = new CameraPosition.Builder().target(position).zoom(18).build();
                 gMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
@@ -290,10 +263,21 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
 
             @Override
             public boolean onQueryTextChange(String s) {
-                adapter.getFilter().filter(s);
                 return false;
             }
         });
 
+        LatLng pos = getIntent().getParcelableExtra("Position");
+        if(pos != null) {
+            Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
+                public void run() {
+                    for (Marker m : museumMarkers) {
+                        if (m.getPosition().toString().equals(pos.toString()))
+                            pointToPosition(m.getPosition());
+                    }
+                }
+            }, 2000);
+        }
     }
 }
