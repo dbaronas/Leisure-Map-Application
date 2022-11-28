@@ -30,8 +30,13 @@ import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResponse;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class MainMenu extends AppCompatActivity {
 
@@ -58,12 +63,11 @@ public class MainMenu extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 getCurrentLocation();
-                Handler handler = new Handler();
-                handler.postDelayed(new Runnable() {
-                    public void run() {
-                        openActivities();
-                    }
-                }, 10000);
+                if(pos == null){
+                    waitForPosition();
+                }
+                else
+                    openActivities();
             }
         });
 
@@ -187,5 +191,17 @@ public class MainMenu extends AppCompatActivity {
     public void openLogin() {
         Intent intent = new Intent(this, Login.class);
         startActivity(intent);
+    }
+
+    public void waitForPosition() {
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            public void run() {
+                if(pos == null)
+                    waitForPosition();
+                else
+                    openActivities();
+            }
+        }, 1000);
     }
 }
