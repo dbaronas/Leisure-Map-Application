@@ -8,9 +8,17 @@ const getScore = (req, res) => {
         distanceScore = 50
     }
     
-    const score = (50 / distanceScore) + (reviewScore * 2) + (isPreffered * 10) + (isOpen * 30)
+    const score = (50 / distanceScore) + (reviewScore * 2)
+    const Result = {
+        Score: score,
+        
+    }
     
-    res.json({Score: parseFloat(score.toFixed(2))})
+    res.json({Result})
+}
+
+const findSimilarUser = (req, res) => {
+
 }
 
 module.exports = {
