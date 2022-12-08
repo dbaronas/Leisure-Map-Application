@@ -19,35 +19,25 @@ public class SignUp extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_up);
 
-        b_sign_up = findViewById(R.id.signIn);
+        b_sign_up = findViewById(R.id.signUp);
         b_sign_up.setOnClickListener(view -> printInfo());
 
         guideText = findViewById(R.id.guide);
         username = findViewById(R.id.inputUsername);
         password = findViewById(R.id.inputPassword);
-        email = findViewById(R.id.inputEmail);
     }
 
     public void printInfo() {
         String un = username.getText().toString();
         String pw = password.getText().toString();
-        String em = email.getText().toString();
         if(un.matches(""))
             guideText.setText("Please enter username");
         else if(pw.matches(""))
             guideText.setText("Please enter password");
-        else if(em.matches(""))
-            guideText.setText("Please enter email address");
-        else if(!Patterns.EMAIL_ADDRESS.matcher(em).matches())
-            guideText.setText("Incorrect email address, try again");
         else {
-            guideText.setText("Confirmation email was sent to your email address");
+            guideText.setText("Your account was successfully created");
             System.out.println(un);
             System.out.println(pw);
-            System.out.println(em);
-            //TODO email address confirmation
-            // 1. when email is confirmed send user information to database
-            // 2. send user information to database right away but only make registered users' functionalities available when email is confirmed
         }
     }
 }

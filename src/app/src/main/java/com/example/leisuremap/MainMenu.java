@@ -30,13 +30,8 @@ import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResponse;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 public class MainMenu extends AppCompatActivity {
 
@@ -62,9 +57,8 @@ public class MainMenu extends AppCompatActivity {
         b_activities.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getCurrentLocation();
                 if(pos == null){
-                    waitForPosition();
+                    getCurrentLocation();
                 }
                 else
                     openActivities();
@@ -121,6 +115,7 @@ public class MainMenu extends AppCompatActivity {
                                     }
                                 }
                             }, Looper.getMainLooper());
+                    waitForPosition();
                 }
                 else {
                     turnOnGPS();

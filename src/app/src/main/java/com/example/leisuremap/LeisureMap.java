@@ -167,7 +167,6 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
             @Override
             public void onCameraMove() {
                 CameraPosition cameraPosition = gMap.getCameraPosition();
-
                 for(Marker m:cityMarkers)
                     m.setVisible(cameraPosition.zoom > 9);
                 for(Marker m:museumMarkers)
@@ -182,42 +181,9 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
                 String snip = marker.getSnippet();
                 if(Objects.equals(snip, "City"))
                 {
-                    RequestQueue queue = Volley.newRequestQueue(LeisureMap.this);
-                    //String url ="http://193.219.91.104:1254/weather?city=" + city;
-                    String url ="https://api.meteo.lt/v1/places/" + city + "/forecasts/long-term";
-
-                    JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
-                        @Override
-                        public void onResponse(JSONObject response) {
-                            try {
-                                JSONObject city = response.getJSONObject("place");
-                                String cityName = city.get("name").toString();
-                                JSONArray array = response.getJSONArray("forecastTimestamps");
-                                Intent intent = new Intent(getApplicationContext(), PopWeather.class);
-                                StringBuilder s = new StringBuilder("City: " + cityName);
-                                for(int i = 0; i < array.length(); i++) {
-                                    JSONObject forecast = (JSONObject) array.get(i);
-                                    String forecastTimeUtc = forecast.get("forecastTimeUtc").toString();
-                                    String airTemperature = forecast.get("airTemperature").toString();
-                                    String windSpeed = forecast.get("windSpeed").toString();
-                                    String cloudCover = forecast.get("cloudCover").toString();
-                                    String conditionCode = forecast.get("conditionCode").toString();
-                                    s.append("\n--------------------------------\n").append("Forecast Time:\n").append(forecastTimeUtc).append("\nAir Temperature: ").append(airTemperature).append("\nWind Speed: ").append(windSpeed).append("\nCloud Cover: ").append(cloudCover).append("\nCondition Code: ").append(conditionCode);
-                                }
-                                intent.putExtra("Weather", s.toString());
-                                startActivity(intent);
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    }, new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            Toast.makeText(LeisureMap.this, "ERROR", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                    request.setRetryPolicy(new DefaultRetryPolicy(60000, 1, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-                    queue.add(request);
+                    Intent intent = new Intent(getBaseContext(), CityPopUpActivity.class);
+                    intent.putExtra("City", city);
+                    startActivity(intent);
                 }
                 return false;
             }
