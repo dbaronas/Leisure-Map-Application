@@ -23,16 +23,15 @@
             android:value="@string/map_key" />
 
         <activity
-            android:name=".PopWeather"
+            android:name=".CityPopUpActivity"
             android:exported="false"
             android:theme="@style/AppTheme.Transparent">
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="" />
         </activity>
-
         <activity
-            android:name=".PopUp"
+            android:name=".PopWeather"
             android:exported="false"
             android:theme="@style/AppTheme.Transparent">
             <meta-data
@@ -68,7 +67,7 @@
                 android:value="" />
         </activity>
         <activity
-            android:name=".ForgotPassword"
+            android:name=".ChangePassword"
             android:exported="false">
             <meta-data
                 android:name="android.app.lib_name"

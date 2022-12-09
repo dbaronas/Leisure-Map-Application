@@ -22,7 +22,7 @@ public class Login extends AppCompatActivity {
         b_login = findViewById(R.id.signIn);
         b_login.setOnClickListener(view -> printInfo());
 
-        b_forgot_pass = findViewById(R.id.forgotPass);
+        b_forgot_pass = findViewById(R.id.changePass);
         b_forgot_pass.setOnClickListener(view -> openForgotPass());
 
         b_sign_up = findViewById(R.id.signUp);
@@ -34,7 +34,7 @@ public class Login extends AppCompatActivity {
     }
 
     public void openForgotPass() {
-        Intent intent = new Intent(this, ForgotPassword.class);
+        Intent intent = new Intent(this, ChangePassword.class);
         startActivity(intent);
     }
 
