@@ -13,7 +13,7 @@ const limiter = rateLimit({
 
 const limiter2 = rateLimit({
 	windowMs: 60 * 60 * 1000,
-	max: 1,
+	max: 2,
 	message: {STATUS},
 	standardHeaders: true,
 	legacyHeaders: false,

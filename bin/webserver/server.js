@@ -1,13 +1,9 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 const app = express()
-const db = require('./app/databaseQueries')
-const api = require('./app/APIs')
-const score = require('./app/algorithm')
-const test = require('./test/testing')
-const overpass = require('./app/updateOverpass')
-const user = require('./app/user')
-const limiter = require('./middleware/rateLimit')
+const application = require('./app')
+const test = require('./test')
+const middleware = require('./middleware')
 const port = 3000
 
 app.use(bodyParser.json())
@@ -18,32 +14,36 @@ app.use(
 )
 
 //Authentication
-app.get('/user/login', limiter.limiter, user.login)
-app.get('/user/create', limiter.limiter2, user.createUser)
-app.get('/user/update', limiter.limiter2, user.updateUser)
-app.get('/user/delete', user.deleteUser)
+app.get('/user/login', middleware.limiter.limiter, application.user.login)
+app.get('/user/create', middleware.limiter.limiter2, application.user.createUser)
+app.get('/user/update', middleware.limiter.limiter2, application.user.updateUser)
+app.get('/user/delete', application.user.deleteUser)
 
 //Update Overpass API
-app.get('/update/overpassapi/cities', overpass.updateCities)
-app.get('/update/overpassapi/leisure', overpass.updateLeisure)
-app.get('/update/overpassapi/restaurants', overpass.updateRestaurant)
+app.get('/update/overpassapi/cities', application.overpass.updateCities)
+app.get('/update/overpassapi/leisure', application.overpass.updateLeisure)
+app.get('/update/overpassapi/restaurants', application.overpass.updateRestaurant)
 
-//Test connections to APIs and database
-app.get('/testconnections', test.testConnections)
-app.get('/score', score.getScore)
+//Testing
+app.get('/test/connections', test.connections.testConnections)
+
+
+app.get('/score', application.score.getScore)
 
 //Get any location from Overpass API
-app.get('/locations', api.getLocations)
+app.get('/locations', application.api.getLocations)
 
 //Vilnius events API
-app.get('/events', api.getVilniusEvents)
+app.get('/events', application.api.getVilniusEvents)
 
 //Meteo API to get weather forecast
-app.get('/weather', api.getWeather)
+app.get('/weather', application.api.getWeather)
 
 //Database tables
-app.get('/table', db.getTable)
+app.get('/table', application.db.getTable)
 
 app.listen(port, () => {
     console.log(`App running on port ${port}.`)
 })
+
+module.exports = app

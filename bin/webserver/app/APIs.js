@@ -32,52 +32,64 @@ const cache = new LRU(options)
 
 const getWeather = async (req, res) => {
   const city = req.query.city
-  const parsedCity = city.charAt(0).toUpperCase() + city.slice(1)
-  const id = await pool.query(`SELECT id FROM cities WHERE name='${parsedCity}'`)
-  const parsedId = parseInt(id.rows[0].id)
   let api
-  
-  if(cache.has(parsedId) == true){
-    res.json(cache.get(parsedId))
-    console.log('cache')
-  }
-  else{
-    const url = 'https://api.meteo.lt/v1/places/' + city + '/forecasts/long-term'
-    const encodedURL = encodeURI(url)
-    await request(encodedURL, (error, response, data) => {
-    if (!error && response.statusCode == 200) {
-      api = JSON.parse(data)
-      cache.set(parsedId, api)
-      res.send(api)
-      console.log('api')
-    }
-      if(response.statusCode == 404){
-          const error = {
-              code: "404",
-              message: "Not Found",
-              
-          }
-          res.json({error: error})
+  let id
+  let parsedId
+  const parsedCity = city.charAt(0).toUpperCase() + city.slice(1)
+  pool.query(`SELECT EXISTS(SELECT 1 FROM city WHERE name='${parsedCity}')`, async (err, response) => {
+    if(response.rows[0].exists == true){
+      id = await pool.query(`SELECT id FROM city WHERE name='${parsedCity}'`)
+      parsedId = parseInt(id.rows[0].id)
+      if(cache.has(parsedId) == true){
+        res.json(cache.get(parsedId))
       }
-    })
-  }
+      else{
+        const url = 'https://api.meteo.lt/v1/places/' + city + '/forecasts/long-term'
+        const encodedURL = encodeURI(url)
+        request(encodedURL, (error, response, data) => {
+        if (!error && response.statusCode == 200) {
+          api = JSON.parse(data)
+          cache.set(parsedId, api)
+          res.send(api)
+        }
+        else{
+              const error = {
+                  code: "404",
+                  message: "Not Found",
+                  
+              }
+              res.status(404).json({error: error})
+          }
+        })
+      }
+    }
+    else{
+      const error = {
+        code: "404",
+        message: "City does not exist",
+        
+    }
+    res.status(404).json({error: error})
+    }
+  })
 }
 
 const getVilniusEvents = async (req, res) => {
   let api
   if(cache.has(1) == true){
     res.json(cache.get(1))
-    console.log('cache')
   }
   else{
     const url = 'https://www.vilnius-events.lt/api/'
     const encodedURL = encodeURI(url)
-    await request(encodedURL, (error, response, data) => {
+    request(encodedURL, (error, response, data) => {
     if (!error && response.statusCode == 200) {
       api = JSON.parse(data)
       cache.set(1, api)
       res.send(api)
-      console.log('api')
+    }
+    else{
+    res.status(404).json({error: 'error'})
     }
     })
   }

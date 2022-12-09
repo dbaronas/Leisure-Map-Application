@@ -33,27 +33,30 @@ const login = (req, res) => {
                 LOGIN: false,
                 message: 'User does not exist'
             }
-            res.send({STATUS})
+            res.status(404).send({STATUS})
         }
     })
 }
 
 const createUser = (req, res) => {
-    /*const username = req.query.username
-    const pass = req.query.pass*/
+    const username = req.query.username
+    const pass = req.query.pass
 
 
-    for(let i = 1; i <= 100000; i++){
-        var username = `labas${i}`
-        var pass = `labas${i}`
+  pool.query(`SELECT EXISTS(SELECT 1 FROM users WHERE username='${username}')`, (error, results) => {
+        if(results.rows[0].exists == false){
         pool.query('INSERT INTO users (username, password) VALUES ($1, $2)', [username, pass], (error, results) => {
             if (error) {
-              throw error
+              res.status(404).send(error)
             }
-            //res.status(201).json({STATUS: 'Account successfully created'})
+            else{
+              res.status(200).json({STATUS: 'Account successfully created'})
+            }
           })
-    }
-    res.send('done')
+        }
+        else{
+          res.status(404).json({STATUS: 'Account with that username already exists'})
+        }})
 
   }
   
@@ -66,9 +69,11 @@ const updateUser = (req, res) => {
       [newpass, username],
       (error, results) => {
         if (error) {
-          throw error
+          res.status(404).send(error)
         }
-        res.status(200).json({STATUS: 'Password updated successfully'})
+        else{
+          res.status(200).json({STATUS: 'Password updated successfully'})
+        }
       }
     )
 }
@@ -78,9 +83,10 @@ const deleteUser = (req, res) => {
   
     pool.query('DELETE FROM users WHERE username = $1', [username], (error, results) => {
       if (error) {
-        throw error
+        res.status(404).send(error)
+        return
       }
-      res.status(200).json({STATUS: 'Password updated successfully'})
+      res.status(200).json({STATUS: 'Account deleted successfully'})
     })
 }
 

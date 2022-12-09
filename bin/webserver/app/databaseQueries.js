@@ -10,19 +10,16 @@ const getTable = (req, res) => {
   const name = req.query.name
   pool.query(`SELECT EXISTS (SELECT FROM pg_tables WHERE schemaname = 'public' AND tablename = '${name}')`, (error, results) => {
     if(results.rows[0].exists == false){
-      res.json({ERROR: `Table ${name} does not exist`})
+      res.status(404).json({ERROR: `Table ${name} does not exist`})
     }
     else{
-      pool.query(`SELECT * FROM ${name} ORDER BY name ASC`, (error, results) => {
+      pool.query(`SELECT * FROM ${name}`, (error, results) => {
         if (error) {
-          throw error
+          res.status(404).send(err)
         }
-    const Project = {
-        Project_name: 'Maps.Relax',
-        Team: 'Kernel Technologies'
-        
-    }
-        res.status(200).send({Project, Table: results.rows})
+        else{
+        res.status(200).send({Table: results.rows})
+        } 
       })
     }
   })

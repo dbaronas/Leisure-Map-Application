@@ -17,9 +17,6 @@ const updateCities = async (req, res) => {
     resolve(data)
   })
   })
-    request('https://overpass-api.de/api/interpreter?data=[out:json][timeout:25];area(id:3600072596)-%3E.searchArea;(node[%22place%22=%22city%22](area.searchArea););out%20body;%3E;out%20skel%20qt;', async (error, response, data) => {
-    
-  })
   parsedData = await JSON.parse(data)
     for(let i = 0; i < parsedData.elements.length - 1; i++){
         pool.query(`SELECT EXISTS(SELECT 1 FROM city WHERE id=${parsedData.elements[i].id})`, (error, response) => {
