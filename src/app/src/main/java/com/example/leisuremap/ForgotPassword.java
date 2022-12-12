@@ -20,8 +20,6 @@ public class ForgotPassword extends AppCompatActivity {
         setContentView(R.layout.activity_forgot_password);
 
         guideText = findViewById(R.id.guide);
-        email = findViewById(R.id.inputEmail);
-        b_send = findViewById(R.id.sendEmail);
         b_send.setOnClickListener(view -> printInfo());
     }
 

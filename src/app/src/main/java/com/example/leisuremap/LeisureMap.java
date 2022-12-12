@@ -1,8 +1,5 @@
 package com.example.leisuremap;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Intent;
 import android.content.res.Resources;
 import android.location.Address;
@@ -10,8 +7,15 @@ import android.location.Geocoder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
@@ -28,15 +32,16 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.MapStyleOptions;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -47,8 +52,15 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
     private static final String TAG = LeisureMap.class.getSimpleName();
     SupportMapFragment mapFragment;
     SearchView searchView;
+    ListView listView;
     List<Marker> cityMarkers = new ArrayList<>();
-    List<Marker> museumMarkers = new ArrayList<>();
+    List<Marker> townMarkers = new ArrayList<>();
+    List<Object> objectList = new ArrayList<>();
+    List<Marker> objectMarkers = new ArrayList<>();
+    Marker currentMarker = null;
+
+    ArrayList<String> arrayList = new ArrayList<>();
+    ArrayAdapter<String> adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,12 +76,20 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
         searchView.setQueryHint("Type here to search");
         mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
+
+        listView = findViewById(R.id.list_view);
+        adapter = new ArrayAdapter<String>(LeisureMap.this,
+                android.R.layout.simple_list_item_1, arrayList);
+        listView.setAdapter(adapter);
+        listView.setVisibility(View.GONE);
+
     }
 
     private void pointToPosition(LatLng position) {
         CameraPosition cameraPosition = new CameraPosition.Builder().target(position).zoom(18).build();
         gMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
     }
+
 
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
@@ -93,27 +113,28 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
             Log.e(TAG, "Can't find style. Error: ", e);
         }
 
-        RequestQueue queue_museums = Volley.newRequestQueue(LeisureMap.this);
-        String url_museums = "https://overpass-api.de/api/interpreter?data=%2F*%0AThis%20has%20been%20generated%20by%20the%20overpass-turbo%20wizard.%0AThe%20original%20search%20was%3A%0A%E2%80%9Ctourism%3Dmuseum%20in%20lithuania%E2%80%9D%0A*%2F%0A%5Bout%3Ajson%5D%5Btimeout%3A25%5D%3B%0A%2F%2F%20fetch%20area%20%E2%80%9Clithuania%E2%80%9D%20to%20search%20in%0Aarea%28id%3A3600072596%29-%3E.searchArea%3B%0A%2F%2F%20gather%20results%0A%28%0A%20%20%2F%2F%20query%20part%20for%3A%20%E2%80%9Ctourism%3Dmuseum%E2%80%9D%0A%20%20node%5B%22tourism%22%3D%22museum%22%5D%28area.searchArea%29%3B%0A%20%20way%5B%22tourism%22%3D%22museum%22%5D%28area.searchArea%29%3B%0A%20%20relation%5B%22tourism%22%3D%22museum%22%5D%28area.searchArea%29%3B%0A%29%3B%0A%2F%2F%20print%20results%0Aout%20body%3B%0A%3E%3B%0Aout%20skel%20qt%3B";
-        //String url_museums = "http://193.219.91.104:1254/table?name=place";
-        JsonObjectRequest request_museusm = new JsonObjectRequest(Request.Method.GET, url_museums, null, new Response.Listener<JSONObject>() {
+        RequestQueue queue_objects = Volley.newRequestQueue(LeisureMap.this);
+        //String url_objects = "https://overpass-api.de/api/interpreter?data=%2F*%0AThis%20has%20been%20generated%20by%20the%20overpass-turbo%20wizard.%0AThe%20original%20search%20was%3A%0A%E2%80%9Ctourism%3Dmuseum%20in%20lithuania%E2%80%9D%0A*%2F%0A%5Bout%3Ajson%5D%5Btimeout%3A25%5D%3B%0A%2F%2F%20fetch%20area%20%E2%80%9Clithuania%E2%80%9D%20to%20search%20in%0Aarea%28id%3A3600072596%29-%3E.searchArea%3B%0A%2F%2F%20gather%20results%0A%28%0A%20%20%2F%2F%20query%20part%20for%3A%20%E2%80%9Ctourism%3Dmuseum%E2%80%9D%0A%20%20node%5B%22tourism%22%3D%22museum%22%5D%28area.searchArea%29%3B%0A%20%20way%5B%22tourism%22%3D%22museum%22%5D%28area.searchArea%29%3B%0A%20%20relation%5B%22tourism%22%3D%22museum%22%5D%28area.searchArea%29%3B%0A%29%3B%0A%2F%2F%20print%20results%0Aout%20body%3B%0A%3E%3B%0Aout%20skel%20qt%3B";
+        String url_objects = "http://193.219.91.104:1254/table?name=place";
+        JsonObjectRequest request_objects = new JsonObjectRequest(Request.Method.GET, url_objects, null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
                 try {
-                    JSONArray array = response.getJSONArray("elements");
-                    //JSONArray array = response.getJSONArray("Table");
+                    //JSONArray array = response.getJSONArray("elements");
+                    JSONArray array = response.getJSONArray("Table");
                     for(int i = 0; i < array.length(); i++) {
                         JSONObject element = (JSONObject) array.get(i);
+                        String objName = element.get("name").toString();
                         String latitude = element.get("lat").toString();
                         String longitude = element.get("lon").toString();
-                        //String objName = element.get("name").toString();
-                        JSONObject obj = (JSONObject) element.get("tags");
-                        String objName = obj.get("name").toString();
+                        String objType = element.get("type").toString();
+                        //JSONObject obj = (JSONObject) element.get("tags");
+                        //String objName = obj.get("name").toString();
                         double lon = Double.valueOf(longitude);
                         double lat = Double.valueOf(latitude);
-                        Marker marker = gMap.addMarker(new MarkerOptions().position(new LatLng(lat, lon)).title(objName).snippet("Museum").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
-                        marker.setVisible(false);
-                        museumMarkers.add(marker);
+                        Object object = new Object(objName, lat, lon, objType);
+                        objectList.add(object);
+                        arrayList.add(objName);
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -125,30 +146,40 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
                 Toast.makeText(LeisureMap.this, "ERROR", Toast.LENGTH_SHORT).show();
             }
         });
-        request_museusm.setRetryPolicy(new DefaultRetryPolicy(60000, 1, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-        queue_museums.add(request_museusm);
+        request_objects.setRetryPolicy(new DefaultRetryPolicy(60000, 1, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+        queue_objects.add(request_objects);
 
         RequestQueue queue_cities = Volley.newRequestQueue(LeisureMap.this);
-        String url_cities = "https://overpass-api.de/api/interpreter?data=[out:json][timeout:25];area(id:3600072596)-%3E.searchArea;(node[%22place%22=%22city%22](area.searchArea);way[%22place%22=%22city%22](area.searchArea);relation[%22place%22=%22city%22](area.searchArea););out%20body;%3E;out%20skel%20qt;";
-        //String url_cities = "http://193.219.91.104:1254/table?name=city";
+        //String url_cities = "https://overpass-api.de/api/interpreter?data=[out:json][timeout:25];area(id:3600072596)-%3E.searchArea;(node[%22place%22=%22city%22](area.searchArea);way[%22place%22=%22city%22](area.searchArea);relation[%22place%22=%22city%22](area.searchArea););out%20body;%3E;out%20skel%20qt;";
+        String url_cities = "http://193.219.91.104:1254/table?name=city";
         JsonObjectRequest request_cities = new JsonObjectRequest(Request.Method.GET, url_cities, null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
                 try {
-                    //JSONArray array = response.getJSONArray("Table");
-                    JSONArray array = response.getJSONArray("elements");
+                    JSONArray array = response.getJSONArray("Table");
+                    //JSONArray array = response.getJSONArray("elements");
                     for(int i = 0; i < array.length(); i++) {
                         JSONObject element = (JSONObject) array.get(i);
                         String latitude = element.get("lat").toString();
                         String longitude = element.get("lon").toString();
-                        //String cityName = element.get("name").toString();
-                        JSONObject obj = (JSONObject) element.get("tags");
-                        String cityName = obj.get("name").toString();
+                        String cityName = element.get("name").toString();
+                        String type = element.get("type").toString();
+                        //JSONObject obj = (JSONObject) element.get("tags");
+                        //String cityName = obj.get("name").toString();
                         double lon = Double.valueOf(longitude);
                         double lat = Double.valueOf(latitude);
-                        Marker marker = gMap.addMarker(new MarkerOptions().position(new LatLng(lat, lon)).title(cityName).snippet("City").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));
-                        marker.setVisible(false);
-                        cityMarkers.add(marker);
+                        if (type.equals("city")) {
+                            Marker cityMarker = gMap.addMarker(new MarkerOptions().position(new LatLng(lat, lon)).title(cityName).snippet(type).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));
+                            cityMarker.setVisible(false);
+                            cityMarkers.add(cityMarker);
+                            arrayList.add(cityName);
+                        }
+                        else {
+                            Marker townMarker = gMap.addMarker(new MarkerOptions().position(new LatLng(lat, lon)).title(cityName).snippet(type).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+                            townMarker.setVisible(false);
+                            townMarkers.add(townMarker);
+                            arrayList.add(cityName);
+                        }
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -167,10 +198,16 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
             @Override
             public void onCameraMove() {
                 CameraPosition cameraPosition = gMap.getCameraPosition();
-                for(Marker m:cityMarkers)
+                for(Marker m:cityMarkers){
                     m.setVisible(cameraPosition.zoom > 9);
-                for(Marker m:museumMarkers)
+                }
+                for(Marker m:townMarkers) {
                     m.setVisible(cameraPosition.zoom > 12);
+                }
+                for(Marker m:objectMarkers) {
+                    m.setVisible(cameraPosition.zoom > 14);
+                }
+
             }
         });
 
@@ -179,7 +216,7 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
             public boolean onMarkerClick(@NonNull Marker marker) {
                 String city = marker.getTitle();
                 String snip = marker.getSnippet();
-                if(Objects.equals(snip, "City"))
+                if(Objects.equals(snip, "city"))
                 {
                     Intent intent = new Intent(getBaseContext(), CityPopUpActivity.class);
                     intent.putExtra("City", city);
@@ -190,46 +227,142 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
         });
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+
+            private void resetSelectedMarker(){
+                if(currentMarker != null){
+                    currentMarker.remove();
+                    currentMarker = null;
+                }
+            }
+            public String removeDiacritics(String src) {
+                return Normalizer
+                        .normalize(src, Normalizer.Form.NFD)
+                        .replaceAll("[\\p{InCombiningDiacriticalMarks}]", "");
+            }
+
             @Override
             public boolean onQueryTextSubmit(String s) {
                 String location = searchView.getQuery().toString();
-                List<Address> addressList = null;
 
-                if (location != null || !location.equals("")){
-                    Geocoder geocoder = new Geocoder(LeisureMap.this);
-
-                    try {
-                        addressList = geocoder.getFromLocationName(location, 2);
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                for (Marker m : cityMarkers) {
+                    if(removeDiacritics(m.getTitle().toLowerCase()).equals(removeDiacritics(location.toLowerCase()))) {
+                        listView.setVisibility(View.INVISIBLE);
+                        pointToPosition(m.getPosition());
+                        gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(m.getPosition(), 10));
                     }
-                    Address address = addressList.get(0);
-                    LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
-                    //LatLng pos = getIntent().getParcelableExtra("Position");
-                    for (Marker m : cityMarkers) {
-                        if (m.getPosition().toString().equals(latLng.toString()))
-                            pointToPosition(m.getPosition()); {
-                            gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 9));
-                        }
+                }
+                for (Marker m : townMarkers) {
+                    if(removeDiacritics(m.getTitle().toLowerCase()).equals(removeDiacritics(location.toLowerCase()))) {
+                        listView.setVisibility(View.INVISIBLE);
+                        pointToPosition(m.getPosition());
+                        gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(m.getPosition(), 13));
                     }
-                    for (Marker m : museumMarkers) {
-                        if (m.getPosition().toString().equals(latLng.toString()))
-                            pointToPosition(m.getPosition()); {
-                            gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 13));
+                }
+                resetSelectedMarker();
+                for (Object o : objectList) {
+                    if(removeDiacritics(o.getName().toLowerCase()).equals(removeDiacritics(location.toLowerCase()))) {
+                        System.out.println("object name: " + removeDiacritics(o.getName().toLowerCase()));
+                        System.out.println("location name: " + removeDiacritics(location.toLowerCase()));
+                        if (currentMarker==null) {
+                            currentMarker = gMap.addMarker(new MarkerOptions().position(new LatLng(o.getLat(), o.getLon())).title(o.getName()).snippet(o.getType()).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
+                            listView.setVisibility(View.INVISIBLE);
+                            pointToPosition(currentMarker.getPosition());
+                            gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentMarker.getPosition(), 15));
+                            objectMarkers.add(currentMarker);
                         }
                     }
                 }
+
+                listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                        String selectedItem = (String) adapterView.getItemAtPosition(i);
+
+                        resetSelectedMarker();
+                        for (Object object : objectList) {
+                            if(selectedItem.equals(object.getName())){
+                                if (currentMarker==null) {
+                                    currentMarker = gMap.addMarker(new MarkerOptions().position(new LatLng(object.getLat(), object.getLon())).title(object.getName()).snippet(object.getType()).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
+                                    listView.setVisibility(View.INVISIBLE);
+                                    pointToPosition(currentMarker.getPosition());
+                                    gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentMarker.getPosition(), 15));
+                                    objectMarkers.add(currentMarker);
+                                }
+                            }
+                        }
+                        for (Marker m : cityMarkers) {
+                            if(m.getTitle().equals(selectedItem)) {
+                                listView.setVisibility(View.INVISIBLE);
+                                pointToPosition(m.getPosition());
+                                gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(m.getPosition(), 10));
+                            }
+                        }
+                        for (Marker m : townMarkers) {
+                            if(m.getTitle().equals(selectedItem)) {
+                                listView.setVisibility(View.INVISIBLE);
+                                pointToPosition(m.getPosition());
+                                gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(m.getPosition(), 13));
+                            }
+                        }
+                    }
+                });
+                adapter.getFilter().filter(s);
                 return false;
             }
+
             private void pointToPosition(LatLng position) {
                 CameraPosition cameraPosition = new CameraPosition.Builder().target(position).zoom(18).build();
                 gMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+
             }
 
             @Override
             public boolean onQueryTextChange(String s) {
+                if (s!= null)
+                {
+                    if (s.isEmpty()){
+                        listView.setVisibility(View.INVISIBLE);
+                    }
+                    else{
+                        listView.setVisibility(View.VISIBLE);
+                        adapter.getFilter().filter(s);
+                    }
+                }
+                listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                        String selectedItem = (String) adapterView.getItemAtPosition(i);
+
+                        resetSelectedMarker();
+                        for (Object object : objectList) {
+                            if(selectedItem.equals(object.getName())){
+                                if (currentMarker==null) {
+                                    currentMarker = gMap.addMarker(new MarkerOptions().position(new LatLng(object.getLat(), object.getLon())).title(object.getName()).snippet(object.getType()).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
+                                    listView.setVisibility(View.INVISIBLE);
+                                    pointToPosition(currentMarker.getPosition());
+                                    gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentMarker.getPosition(), 15));
+                                }
+                            }
+                        }
+                        for (Marker m : cityMarkers) {
+                            if(m.getTitle().equals(selectedItem)) {
+                                pointToPosition(m.getPosition());
+                                listView.setVisibility(View.INVISIBLE);
+                                gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(m.getPosition(), 10));
+                            }
+                        }
+                        for (Marker m : townMarkers) {
+                            if(m.getTitle().equals(selectedItem)) {
+                                pointToPosition(m.getPosition());
+                                listView.setVisibility(View.INVISIBLE);
+                                gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(m.getPosition(), 13));
+                            }
+                        }
+                    }
+                });
                 return false;
             }
+
         });
 
         LatLng pos = getIntent().getParcelableExtra("Position");
@@ -237,7 +370,7 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
             Handler handler = new Handler();
             handler.postDelayed(new Runnable() {
                 public void run() {
-                    for (Marker m : museumMarkers) {
+                    for (Marker m : objectMarkers) {
                         if (m.getPosition().toString().equals(pos.toString()))
                             pointToPosition(m.getPosition());
                     }

@@ -21,6 +21,13 @@ public class Object {
         this.score = score;
     }
 
+    public Object(String name, double lat, double lon, String type) {
+        this.name = name;
+        this.lat = lat;
+        this.lon = lon;
+        this.type = type;
+    }
+
     public double getDistance() {
         return distance;
     }
