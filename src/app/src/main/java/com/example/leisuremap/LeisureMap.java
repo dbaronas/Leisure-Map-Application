@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.location.Address;
 import android.location.Geocoder;
+import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -43,8 +44,10 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.text.Normalizer;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -61,6 +64,7 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
 
     ArrayList<String> arrayList = new ArrayList<>();
     ArrayAdapter<String> adapter;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,6 +86,7 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
                 android.R.layout.simple_list_item_1, arrayList);
         listView.setAdapter(adapter);
         listView.setVisibility(View.GONE);
+
 
     }
 
@@ -113,6 +118,7 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
             Log.e(TAG, "Can't find style. Error: ", e);
         }
 
+        LatLng userPos = getIntent().getParcelableExtra("Pos"); // getting user's position
         RequestQueue queue_objects = Volley.newRequestQueue(LeisureMap.this);
         //String url_objects = "https://overpass-api.de/api/interpreter?data=%2F*%0AThis%20has%20been%20generated%20by%20the%20overpass-turbo%20wizard.%0AThe%20original%20search%20was%3A%0A%E2%80%9Ctourism%3Dmuseum%20in%20lithuania%E2%80%9D%0A*%2F%0A%5Bout%3Ajson%5D%5Btimeout%3A25%5D%3B%0A%2F%2F%20fetch%20area%20%E2%80%9Clithuania%E2%80%9D%20to%20search%20in%0Aarea%28id%3A3600072596%29-%3E.searchArea%3B%0A%2F%2F%20gather%20results%0A%28%0A%20%20%2F%2F%20query%20part%20for%3A%20%E2%80%9Ctourism%3Dmuseum%E2%80%9D%0A%20%20node%5B%22tourism%22%3D%22museum%22%5D%28area.searchArea%29%3B%0A%20%20way%5B%22tourism%22%3D%22museum%22%5D%28area.searchArea%29%3B%0A%20%20relation%5B%22tourism%22%3D%22museum%22%5D%28area.searchArea%29%3B%0A%29%3B%0A%2F%2F%20print%20results%0Aout%20body%3B%0A%3E%3B%0Aout%20skel%20qt%3B";
         String url_objects = "http://193.219.91.104:1254/table?name=place";
@@ -128,13 +134,35 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
                         String latitude = element.get("lat").toString();
                         String longitude = element.get("lon").toString();
                         String objType = element.get("type").toString();
+                        if(objName.equals("null")) {
+                            objName = objType;
+                        }
                         //JSONObject obj = (JSONObject) element.get("tags");
                         //String objName = obj.get("name").toString();
                         double lon = Double.valueOf(longitude);
                         double lat = Double.valueOf(latitude);
+                        LatLng pos = new LatLng(lat, lon);
                         Object object = new Object(objName, lat, lon, objType);
                         objectList.add(object);
-                        arrayList.add(objName);
+
+                        Location startPoint=new Location("UserPos");
+                        if(userPos == null) {
+                            startPoint.setLatitude(0);
+                            startPoint.setLongitude(0);
+                        }
+                        else {
+                            startPoint.setLatitude(userPos.latitude);
+                            startPoint.setLongitude(userPos.longitude);
+                        }
+
+                        Location endPoint=new Location("Object");
+                        endPoint.setLatitude(pos.latitude);
+                        endPoint.setLongitude(pos.longitude);
+
+                        double distance=startPoint.distanceTo(endPoint) / 1000;
+
+                        String objNameDistance = objName + " | distance: " + String.format("%.0f", distance) + " km";
+                        arrayList.add(objNameDistance);
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -148,6 +176,7 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
         });
         request_objects.setRetryPolicy(new DefaultRetryPolicy(60000, 1, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         queue_objects.add(request_objects);
+
 
         RequestQueue queue_cities = Volley.newRequestQueue(LeisureMap.this);
         //String url_cities = "https://overpass-api.de/api/interpreter?data=[out:json][timeout:25];area(id:3600072596)-%3E.searchArea;(node[%22place%22=%22city%22](area.searchArea);way[%22place%22=%22city%22](area.searchArea);relation[%22place%22=%22city%22](area.searchArea););out%20body;%3E;out%20skel%20qt;";
@@ -168,17 +197,35 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
                         //String cityName = obj.get("name").toString();
                         double lon = Double.valueOf(longitude);
                         double lat = Double.valueOf(latitude);
+                        LatLng pos = new LatLng(lat, lon);
+                        Location startPoint=new Location("UserPos");
+                        if(userPos == null) {
+                            startPoint.setLatitude(0);
+                            startPoint.setLongitude(0);
+                        }
+                        else {
+                            startPoint.setLatitude(userPos.latitude);
+                            startPoint.setLongitude(userPos.longitude);
+                        }
+
+                        Location endPoint=new Location("Object");
+                        endPoint.setLatitude(pos.latitude);
+                        endPoint.setLongitude(pos.longitude);
+
+                        double distance=startPoint.distanceTo(endPoint) / 1000;
                         if (type.equals("city")) {
                             Marker cityMarker = gMap.addMarker(new MarkerOptions().position(new LatLng(lat, lon)).title(cityName).snippet(type).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));
                             cityMarker.setVisible(false);
                             cityMarkers.add(cityMarker);
-                            arrayList.add(cityName);
+                            String cityNameDistance = cityName + " | distance: " + String.format("%.0f", distance) + " km";
+                            arrayList.add(cityNameDistance);
                         }
                         else {
                             Marker townMarker = gMap.addMarker(new MarkerOptions().position(new LatLng(lat, lon)).title(cityName).snippet(type).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
                             townMarker.setVisible(false);
                             townMarkers.add(townMarker);
-                            arrayList.add(cityName);
+                            String cityNameDistance = cityName + " | distance: " + String.format("%.0f", distance) + " km";
+                            arrayList.add(cityNameDistance);
                         }
                     }
                 } catch (JSONException e) {
@@ -240,6 +287,13 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
                         .replaceAll("[\\p{InCombiningDiacriticalMarks}]", "");
             }
 
+            private String removeChars(String itemSelected) {
+                return itemSelected.replaceAll("\\|.*","");
+            }
+            private String removeSpace(String itemSelected) {
+                return itemSelected.trim();
+            }
+
             @Override
             public boolean onQueryTextSubmit(String s) {
                 String location = searchView.getQuery().toString();
@@ -261,8 +315,6 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
                 resetSelectedMarker();
                 for (Object o : objectList) {
                     if(removeDiacritics(o.getName().toLowerCase()).equals(removeDiacritics(location.toLowerCase()))) {
-                        System.out.println("object name: " + removeDiacritics(o.getName().toLowerCase()));
-                        System.out.println("location name: " + removeDiacritics(location.toLowerCase()));
                         if (currentMarker==null) {
                             currentMarker = gMap.addMarker(new MarkerOptions().position(new LatLng(o.getLat(), o.getLon())).title(o.getName()).snippet(o.getType()).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
                             listView.setVisibility(View.INVISIBLE);
@@ -279,10 +331,10 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
                         String selectedItem = (String) adapterView.getItemAtPosition(i);
 
                         resetSelectedMarker();
-                        for (Object object : objectList) {
-                            if(selectedItem.equals(object.getName())){
+                        for (Object o : objectList) {
+                            if((removeSpace(removeChars(selectedItem))).equals(o.getName())){
                                 if (currentMarker==null) {
-                                    currentMarker = gMap.addMarker(new MarkerOptions().position(new LatLng(object.getLat(), object.getLon())).title(object.getName()).snippet(object.getType()).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
+                                    currentMarker = gMap.addMarker(new MarkerOptions().position(new LatLng(o.getLat(), o.getLon())).title(o.getName()).snippet(o.getType()).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
                                     listView.setVisibility(View.INVISIBLE);
                                     pointToPosition(currentMarker.getPosition());
                                     gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentMarker.getPosition(), 15));
@@ -291,14 +343,14 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
                             }
                         }
                         for (Marker m : cityMarkers) {
-                            if(m.getTitle().equals(selectedItem)) {
+                            if(m.getTitle().equals(removeSpace(removeChars(selectedItem)))) {
                                 listView.setVisibility(View.INVISIBLE);
                                 pointToPosition(m.getPosition());
                                 gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(m.getPosition(), 10));
                             }
                         }
                         for (Marker m : townMarkers) {
-                            if(m.getTitle().equals(selectedItem)) {
+                            if(m.getTitle().equals(removeSpace(removeChars(selectedItem)))) {
                                 listView.setVisibility(View.INVISIBLE);
                                 pointToPosition(m.getPosition());
                                 gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(m.getPosition(), 13));
@@ -335,24 +387,26 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
 
                         resetSelectedMarker();
                         for (Object object : objectList) {
-                            if(selectedItem.equals(object.getName())){
+                            if((removeSpace(removeChars(selectedItem))).equals(object.getName())){
+                                System.out.println("selecteditem: " + removeSpace(removeChars(selectedItem)) + " objectLat: " + object.getLat() + " objectLon: " + object.getLon());
                                 if (currentMarker==null) {
                                     currentMarker = gMap.addMarker(new MarkerOptions().position(new LatLng(object.getLat(), object.getLon())).title(object.getName()).snippet(object.getType()).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
                                     listView.setVisibility(View.INVISIBLE);
                                     pointToPosition(currentMarker.getPosition());
                                     gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentMarker.getPosition(), 15));
+                                    objectMarkers.add(currentMarker);
                                 }
                             }
                         }
                         for (Marker m : cityMarkers) {
-                            if(m.getTitle().equals(selectedItem)) {
+                            if(m.getTitle().equals(removeSpace(removeChars(selectedItem)))) {
                                 pointToPosition(m.getPosition());
                                 listView.setVisibility(View.INVISIBLE);
                                 gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(m.getPosition(), 10));
                             }
                         }
                         for (Marker m : townMarkers) {
-                            if(m.getTitle().equals(selectedItem)) {
+                            if(m.getTitle().equals(removeSpace(removeChars(selectedItem)))) {
                                 pointToPosition(m.getPosition());
                                 listView.setVisibility(View.INVISIBLE);
                                 gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(m.getPosition(), 13));

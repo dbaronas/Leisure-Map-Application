@@ -38,6 +38,7 @@ public class MainMenu extends AppCompatActivity {
     private Button b_map, b_activities, b_sign_in;
     private LocationRequest locationRequest;
     private LatLng pos;
+    int i;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,9 +60,22 @@ public class MainMenu extends AppCompatActivity {
             public void onClick(View v) {
                 if(pos == null){
                     getCurrentLocation();
+                    i=0;
                 }
                 else
                     openActivities();
+            }
+        });
+
+        b_map.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(pos == null){
+                    getCurrentLocation();
+                    i=1;
+                }
+                else
+                    openLeisureMap();
             }
         });
 
@@ -115,7 +129,9 @@ public class MainMenu extends AppCompatActivity {
                                     }
                                 }
                             }, Looper.getMainLooper());
+
                     waitForPosition();
+                    //nusiust 0 arba 1
                 }
                 else {
                     turnOnGPS();
@@ -183,6 +199,12 @@ public class MainMenu extends AppCompatActivity {
         startActivity(intent);
     }
 
+    public void openLeisureMap() {
+        Intent intent = new Intent(this, LeisureMap.class);
+        intent.putExtra("Pos", pos);
+        startActivity(intent);
+    }
+
     public void openLogin() {
         Intent intent = new Intent(this, Login.class);
         startActivity(intent);
@@ -194,9 +216,15 @@ public class MainMenu extends AppCompatActivity {
             public void run() {
                 if(pos == null)
                     waitForPosition();
-                else
+                else if (i==0){
                     openActivities();
+                }
+                else {
+                    openLeisureMap();
+                }
+
             }
         }, 1000);
     }
+
 }
