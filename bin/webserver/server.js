@@ -42,6 +42,9 @@ app.get('/weather', application.api.getWeather)
 //Database tables
 app.get('/table', application.db.getTable)
 
+//Recommendation
+app.get('/recommendation', application.recom.getRecommendation)
+
 app.listen(port, () => {
     console.log(`App running on port ${port}.`)
 })

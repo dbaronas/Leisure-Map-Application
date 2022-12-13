@@ -38,7 +38,7 @@ const updateCities = async (req, res) => {
       for(let i = 0; i < parsedData.elements.length - 1; i++){
         pool.query(`SELECT EXISTS(SELECT 1 FROM city WHERE id=${parsedData.elements[i].id})`, (error, response) => {
           if(response.rows[0].exists == false){
-            pool.query(`INSERT INTO city (id, name, lat, lon, type) VALUES ($1, $2, $3, $4, 'city')`, [parsedData.elements[i].id, parsedData.elements[i].tags.name, parsedData.elements[i].lat, parsedData.elements[i].lon], (error, results) => {
+            pool.query(`INSERT INTO city (id, name, lat, lon, type) VALUES ($1, $2, $3, $4, 'town')`, [parsedData.elements[i].id, parsedData.elements[i].tags.name, parsedData.elements[i].lat, parsedData.elements[i].lon], (error, results) => {
               if (error) {
                 throw error
               }
@@ -102,7 +102,7 @@ const updateLeisure = async (req, res) => {
     })
     pool.query(`SELECT EXISTS(SELECT 1 FROM place WHERE id=${parsedData.elements[i].id})`, (error, response) => {
       if(response.rows[0].exists == false){
-        pool.query(`INSERT INTO place (id, name, opening_hours, phone, website, city, lat, lon, type) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`, [parsedData.elements[i].id, parsedData.elements[i].tags.name, parsedData.elements[i].tags.opening_hours, parsedData.elements[i].tags.phone, parsedData.elements[i].tags.website, parsedData.elements[i].tags['addr:city'], parsedData.elements[i].lat, parsedData.elements[i].lon, parsedData.elements[i].tags.leisure], (error, results) => {
+        pool.query(`INSERT INTO place (id, name, opening_hours, phone, website, city, lat, lon, type) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`, [parsedData.elements[i].id, parsedData.elements[i].tags.name, parsedData.elements[i].tags.opening_hours, parsedData.elements[i].tags.phone, parsedData.elements[i].tags.website, parsedData.elements[i].tags['addr:city'], parsedData.elements[i].lat, parsedData.elements[i].lon, parsedData.elements[i].tags.tourism], (error, results) => {
           if (error) {
             throw error
           }
