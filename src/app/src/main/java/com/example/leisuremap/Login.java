@@ -1,6 +1,8 @@
 package com.example.leisuremap;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
@@ -11,14 +13,32 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.nio.charset.StandardCharsets;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 
 public class Login extends AppCompatActivity {
 
-    private Button b_login, b_sign_up, b_forgot_pass;
+    private Button b_login, b_sign_up, b_change_pass;
     EditText username, password;
     TextView guideText;
+    boolean isLoggedIn = false;
+    public static Activity fa;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,11 +46,19 @@ public class Login extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        b_login = findViewById(R.id.signIn);
-        b_login.setOnClickListener(view -> printInfo());
+        fa = this;
 
-        b_forgot_pass = findViewById(R.id.changePass);
-        b_forgot_pass.setOnClickListener(view -> openForgotPass());
+        b_login = findViewById(R.id.signIn);
+        b_login.setOnClickListener(view -> {
+            try {
+                printInfo();
+            } catch (InvalidAlgorithmParameterException | IllegalBlockSizeException | NoSuchPaddingException | BadPaddingException | NoSuchAlgorithmException | InvalidKeyException e) {
+                e.printStackTrace();
+            }
+        });
+
+        b_change_pass = findViewById(R.id.changePass);
+        b_change_pass.setOnClickListener(view -> openForgotPass());
 
         b_sign_up = findViewById(R.id.signUp);
         b_sign_up.setOnClickListener(view -> openSignUp());
@@ -50,7 +78,7 @@ public class Login extends AppCompatActivity {
         startActivity(intent);
     }
 
-    public void printInfo() {
+    public void printInfo() throws InvalidAlgorithmParameterException, IllegalBlockSizeException, NoSuchPaddingException, BadPaddingException, NoSuchAlgorithmException, InvalidKeyException {
         String un = username.getText().toString();
         String pw = password.getText().toString();
         if(un.matches(""))
@@ -58,35 +86,45 @@ public class Login extends AppCompatActivity {
         else if(pw.matches(""))
             guideText.setText("Please enter password");
         else {
-            guideText.setText("You have successfully logged in");
-            System.out.println(un);
-            System.out.println(pw);
-            //TODO email address confirmation
-            // 1. when email is confirmed send user information to database
-            // 2. send user information to database right away but only make registered users' functionalities available when email is confirmed
+            EncryptPass encryptPass = new EncryptPass(pw);
+            logIn(un, encryptPass.encryption());
+            System.out.println("Login: " + "username: " + un + " password: " + encryptPass.encryption());
         }
-        this.logInRequest(un, pw);
     }
 
     //client will send the data to the server in a form of url - GET request, query parameters will be present inside URL
-    public void logInRequest (String username, String password){
+    public void logIn(String username, String password) {
         RequestQueue queue = Volley.newRequestQueue(this);
-        String url = "http://193.219.91.104:1254/user/login?username="+username+"&pass="+password;
+        String url = "http://193.219.91.104:1254/user/login?username=" + username + "&pass=" + password;
 
-        System.out.println("username: " + username + " password: " + password);
-
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-                new Response.Listener<String>() {
+        Intent intent = new Intent(this, MainMenu.class);
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
                     @Override
-                    public void onResponse(String response) {
-                        System.out.println("response: " + response);
+                    public void onResponse(JSONObject response) {
+                        //String message;
+                        try {
+                            JSONObject status = response.getJSONObject("STATUS");
+                            isLoggedIn = (boolean) status.get("LOGIN");
+                            //message = (String) status.get("message");
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        if(isLoggedIn) {
+                            guideText.setText("Logged in");
+                            intent.putExtra("UserStatus", isLoggedIn);
+                            startActivity(intent);
+                            MainMenu.fa.finish();
+                            finish();
+                        }
+                        else
+                            guideText.setText("Could not log in");
                     }
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                System.out.println("not connected ");
+                guideText.setText("Connection problem");
             }
         });
-        queue.add(stringRequest);
+        queue.add(request);
     }
 }

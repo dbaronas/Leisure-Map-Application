@@ -2,8 +2,6 @@ package com.example.leisuremap;
 
 import android.content.Intent;
 import android.content.res.Resources;
-import android.location.Address;
-import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
@@ -41,13 +39,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.text.Normalizer;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -64,7 +59,6 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
 
     ArrayList<String> arrayList = new ArrayList<>();
     ArrayAdapter<String> adapter;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,7 +80,6 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
                 android.R.layout.simple_list_item_1, arrayList);
         listView.setAdapter(adapter);
         listView.setVisibility(View.GONE);
-
 
     }
 
@@ -142,8 +135,6 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
                         double lon = Double.valueOf(longitude);
                         double lat = Double.valueOf(latitude);
                         LatLng pos = new LatLng(lat, lon);
-                        Object object = new Object(objName, lat, lon, objType);
-                        objectList.add(object);
 
                         Location startPoint=new Location("UserPos");
                         if(userPos == null) {
@@ -160,8 +151,11 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
                         endPoint.setLongitude(pos.longitude);
 
                         double distance=startPoint.distanceTo(endPoint) / 1000;
+                        Object object = new Object(objName, lat, lon, objType, String.format("%.3f", distance));
+                        objectList.add(object);
+                        System.out.println("object distance: " + object.getDistanceString());
 
-                        String objNameDistance = objName + " | distance: " + String.format("%.0f", distance) + " km";
+                        String objNameDistance = objName + " | distance: " + String.format("%.3f", distance) + " km";
                         arrayList.add(objNameDistance);
                     }
                 } catch (JSONException e) {
@@ -176,7 +170,6 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
         });
         request_objects.setRetryPolicy(new DefaultRetryPolicy(60000, 1, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         queue_objects.add(request_objects);
-
 
         RequestQueue queue_cities = Volley.newRequestQueue(LeisureMap.this);
         //String url_cities = "https://overpass-api.de/api/interpreter?data=[out:json][timeout:25];area(id:3600072596)-%3E.searchArea;(node[%22place%22=%22city%22](area.searchArea);way[%22place%22=%22city%22](area.searchArea);relation[%22place%22=%22city%22](area.searchArea););out%20body;%3E;out%20skel%20qt;";
@@ -217,14 +210,14 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
                             Marker cityMarker = gMap.addMarker(new MarkerOptions().position(new LatLng(lat, lon)).title(cityName).snippet(type).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));
                             cityMarker.setVisible(false);
                             cityMarkers.add(cityMarker);
-                            String cityNameDistance = cityName + " | distance: " + String.format("%.0f", distance) + " km";
+                            String cityNameDistance = cityName + " | distance: " + String.format("%.3f", distance) + " km";
                             arrayList.add(cityNameDistance);
                         }
                         else {
                             Marker townMarker = gMap.addMarker(new MarkerOptions().position(new LatLng(lat, lon)).title(cityName).snippet(type).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
                             townMarker.setVisible(false);
                             townMarkers.add(townMarker);
-                            String cityNameDistance = cityName + " | distance: " + String.format("%.0f", distance) + " km";
+                            String cityNameDistance = cityName + " | distance: " + String.format("%.3f", distance) + " km";
                             arrayList.add(cityNameDistance);
                         }
                     }
@@ -281,16 +274,21 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
                     currentMarker = null;
                 }
             }
-            public String removeDiacritics(String src) {
+            private String removeDiacritics(String src) {
                 return Normalizer
                         .normalize(src, Normalizer.Form.NFD)
                         .replaceAll("[\\p{InCombiningDiacriticalMarks}]", "");
             }
-
-            private String removeChars(String itemSelected) {
+            //removes symbol '|' and chars after symbol '|', extracts location name from a string
+            private String removeCharsAfter(String itemSelected) {
                 return itemSelected.replaceAll("\\|.*","");
             }
-            private String removeSpace(String itemSelected) {
+            //removes symbol ':' and chars before symbol ':', extracts kilometers from a string
+            private String removeCharsBefore(String itemSelected) {
+                return itemSelected.substring(itemSelected.indexOf(": ")+1, itemSelected.lastIndexOf("k"));
+            }
+            //removes leading and trailing white spaces from a string
+            private String removeSpaces(String itemSelected) {
                 return itemSelected.trim();
             }
 
@@ -332,7 +330,7 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
 
                         resetSelectedMarker();
                         for (Object o : objectList) {
-                            if((removeSpace(removeChars(selectedItem))).equals(o.getName())){
+                            if((removeSpaces(removeCharsBefore(selectedItem))).equals(o.getDistanceString())){
                                 if (currentMarker==null) {
                                     currentMarker = gMap.addMarker(new MarkerOptions().position(new LatLng(o.getLat(), o.getLon())).title(o.getName()).snippet(o.getType()).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
                                     listView.setVisibility(View.INVISIBLE);
@@ -343,14 +341,14 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
                             }
                         }
                         for (Marker m : cityMarkers) {
-                            if(m.getTitle().equals(removeSpace(removeChars(selectedItem)))) {
+                            if(m.getTitle().equals(removeSpaces(removeCharsAfter(selectedItem)))) {
                                 listView.setVisibility(View.INVISIBLE);
                                 pointToPosition(m.getPosition());
                                 gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(m.getPosition(), 10));
                             }
                         }
                         for (Marker m : townMarkers) {
-                            if(m.getTitle().equals(removeSpace(removeChars(selectedItem)))) {
+                            if(m.getTitle().equals(removeSpaces(removeCharsAfter(selectedItem)))) {
                                 listView.setVisibility(View.INVISIBLE);
                                 pointToPosition(m.getPosition());
                                 gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(m.getPosition(), 13));
@@ -385,12 +383,13 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
                     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                         String selectedItem = (String) adapterView.getItemAtPosition(i);
 
+                        //System.out.println("selected item:" + removeCharsBefore(selectedItem));
                         resetSelectedMarker();
-                        for (Object object : objectList) {
-                            if((removeSpace(removeChars(selectedItem))).equals(object.getName())){
-                                System.out.println("selecteditem: " + removeSpace(removeChars(selectedItem)) + " objectLat: " + object.getLat() + " objectLon: " + object.getLon());
+                        for (Object o : objectList) {
+                            if((removeSpaces(removeCharsBefore(selectedItem))).equals(o.getDistanceString())){
+                                //System.out.println("selecteditem: " + removeSpaces(removeCharsBefore(selectedItem)) + " object distance: " + o.getDistanceString());
                                 if (currentMarker==null) {
-                                    currentMarker = gMap.addMarker(new MarkerOptions().position(new LatLng(object.getLat(), object.getLon())).title(object.getName()).snippet(object.getType()).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
+                                    currentMarker = gMap.addMarker(new MarkerOptions().position(new LatLng(o.getLat(), o.getLon())).title(o.getName()).snippet(o.getType()).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
                                     listView.setVisibility(View.INVISIBLE);
                                     pointToPosition(currentMarker.getPosition());
                                     gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentMarker.getPosition(), 15));
@@ -399,14 +398,14 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
                             }
                         }
                         for (Marker m : cityMarkers) {
-                            if(m.getTitle().equals(removeSpace(removeChars(selectedItem)))) {
+                            if(m.getTitle().equals(removeSpaces(removeCharsAfter(selectedItem)))) {
                                 pointToPosition(m.getPosition());
                                 listView.setVisibility(View.INVISIBLE);
                                 gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(m.getPosition(), 10));
                             }
                         }
                         for (Marker m : townMarkers) {
-                            if(m.getTitle().equals(removeSpace(removeChars(selectedItem)))) {
+                            if(m.getTitle().equals(removeSpaces(removeCharsAfter(selectedItem)))) {
                                 pointToPosition(m.getPosition());
                                 listView.setVisibility(View.INVISIBLE);
                                 gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(m.getPosition(), 13));

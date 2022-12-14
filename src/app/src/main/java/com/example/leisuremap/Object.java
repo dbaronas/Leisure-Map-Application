@@ -9,6 +9,7 @@ public class Object {
     private String city;
     private String type;
     private double score;
+    private String distanceString;
 
     public Object(String name, double distance, double lat, double lon, int rating, String city, String type, double score) {
         this.name = name;
@@ -21,11 +22,12 @@ public class Object {
         this.score = score;
     }
 
-    public Object(String name, double lat, double lon, String type) {
+    public Object(String name, double lat, double lon, String type, String distanceString) {
         this.name = name;
         this.lat = lat;
         this.lon = lon;
         this.type = type;
+        this.distanceString = distanceString;
     }
 
     public double getDistance() {
@@ -90,5 +92,13 @@ public class Object {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public String getDistanceString() {
+        return distanceString;
+    }
+
+    public void setDistanceString(String distanceString) {
+        this.distanceString = distanceString;
     }
 }

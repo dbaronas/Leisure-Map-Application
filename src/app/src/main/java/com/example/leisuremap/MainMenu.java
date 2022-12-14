@@ -38,6 +38,8 @@ public class MainMenu extends AppCompatActivity {
     private Button b_map, b_activities, b_sign_in;
     private LocationRequest locationRequest;
     private LatLng pos;
+    boolean isLoggedIn = false;
+    public static Activity fa;
     int i;
 
     @Override
@@ -46,8 +48,10 @@ public class MainMenu extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_menu);
 
+        fa = this; // to finish activity if user successfully logs in
+
         b_map = findViewById(R.id.map);
-        b_map.setOnClickListener(view -> openMap());
+        b_map.setOnClickListener(view -> openLeisureMap());
 
         locationRequest = LocationRequest.create();
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
@@ -60,7 +64,7 @@ public class MainMenu extends AppCompatActivity {
             public void onClick(View v) {
                 if(pos == null){
                     getCurrentLocation();
-                    i=0;
+                    i = 0;
                 }
                 else
                     openActivities();
@@ -72,7 +76,7 @@ public class MainMenu extends AppCompatActivity {
             public void onClick(View view) {
                 if(pos == null){
                     getCurrentLocation();
-                    i=1;
+                    i = 1;
                 }
                 else
                     openLeisureMap();
@@ -81,6 +85,11 @@ public class MainMenu extends AppCompatActivity {
 
         b_sign_in = findViewById(R.id.signIn);
         b_sign_in.setOnClickListener(view -> openLogin());
+
+        isLoggedIn = checkUserStatus();
+        if (!isLoggedIn) {
+            b_activities.setEnabled(false);
+        }
     }
 
     @Override
@@ -129,9 +138,7 @@ public class MainMenu extends AppCompatActivity {
                                     }
                                 }
                             }, Looper.getMainLooper());
-
                     waitForPosition();
-                    //nusiust 0 arba 1
                 }
                 else {
                     turnOnGPS();
@@ -188,11 +195,6 @@ public class MainMenu extends AppCompatActivity {
         return isEnabled;
     }
 
-    public void openMap() {
-        Intent intent = new Intent(this, LeisureMap.class);
-        startActivity(intent);
-    }
-
     public void openActivities() {
         Intent intent = new Intent(this, FindActivities.class);
         intent.putExtra("Pos", pos);
@@ -208,6 +210,10 @@ public class MainMenu extends AppCompatActivity {
     public void openLogin() {
         Intent intent = new Intent(this, Login.class);
         startActivity(intent);
+    }
+
+    public boolean checkUserStatus() {
+        return getIntent().getBooleanExtra("UserStatus", false);
     }
 
     public void waitForPosition() {
@@ -226,5 +232,4 @@ public class MainMenu extends AppCompatActivity {
             }
         }, 1000);
     }
-
 }
