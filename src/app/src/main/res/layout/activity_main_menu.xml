@@ -32,39 +32,15 @@
         app:layout_constraintTop_toBottomOf="@+id/textView" />
 
     <Button
-        android:id="@+id/favoritePlaces"
-        android:layout_width="205dp"
-        android:layout_height="63dp"
-        android:layout_marginTop="20dp"
-        android:textSize="14sp"
-        android:text="@string/favorite_places"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/findActivities" />
-
-    <Button
         android:id="@+id/signIn"
         android:layout_width="205dp"
         android:layout_height="63dp"
         android:layout_marginTop="20dp"
         android:textSize="14sp"
         android:text="@string/sign_in_sign_up"
-        android:onClick="saveLoggedInSession"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/favoritePlaces" />
-
-    <Button
-        android:id="@+id/logOut"
-        android:layout_width="205dp"
-        android:layout_height="63dp"
-        android:layout_marginTop="20dp"
-        android:textSize="14sp"
-        android:text="@string/log_out"
-        android:onClick="logOut"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/signIn" />
+        app:layout_constraintTop_toBottomOf="@+id/findActivities" />
 
     <TextView
         android:id="@+id/textView"

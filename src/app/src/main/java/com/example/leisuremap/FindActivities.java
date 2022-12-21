@@ -93,9 +93,6 @@ public class FindActivities extends AppCompatActivity {
                         //String objName = json_obj.get("name").toString();
                         String objType = element.get("type").toString();
                         String objName = element.get("name").toString();
-                        String rating = element.get("rating").toString();
-                        double objRating = Double.parseDouble(rating);
-
                         if(objName.equals("null"))
                             objName = objType;
 
@@ -117,6 +114,21 @@ public class FindActivities extends AppCompatActivity {
 
                         double distance=startPoint.distanceTo(endPoint) / 1000;
 
+                        //Randomized data------------------
+                        int randomRating = (int)(Math.random()*(5-1+1)+1);
+
+                        //final String[] cities = {"Kaunas", "Vilnius", "Klaipėda", "Palanga"};
+                        //Random random1 = new Random();
+                        //int randomIndex1 = random1.nextInt(cities.length);
+                        //String randomCity = cities[randomIndex1];
+
+                        //final String[] types = {"Restaurant", "Museum", "Gym", "Park"};
+                        //Random random2 = new Random();
+                        //int randomIndex2 = random2.nextInt(types.length);
+                        //String randomType = types[randomIndex2];
+                        //String randomType = objType;
+                        //---------------------------------
+
                         if(!select_cities.contains(objCity)){
                             select_cities.add(objCity);
                         }
@@ -125,9 +137,9 @@ public class FindActivities extends AppCompatActivity {
                             select_types.add(objType);
                         }
 
-                        double score = (10 - Math.sqrt(distance)) * 2 + (objRating * 2);
+                        double score = (10 - Math.sqrt(distance)) * 2 + (randomRating * 2);
 
-                        Object obj = new Object(objName, distance, lat, lon, objRating, objCity, objType, score);
+                        Object obj = new Object(objName, distance, lat, lon, randomRating, objCity, objType, score);
                         objects.add(obj);
                     }
                 } catch (JSONException e) {

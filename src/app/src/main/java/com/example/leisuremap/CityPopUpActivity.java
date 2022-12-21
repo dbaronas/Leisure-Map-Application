@@ -1,10 +1,8 @@
 package com.example.leisuremap;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.text.HtmlCompat;
 
 import android.content.Intent;
-import android.location.Location;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
@@ -63,8 +61,8 @@ public class CityPopUpActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 RequestQueue queue = Volley.newRequestQueue(CityPopUpActivity.this);
-                String url ="http://193.219.91.104:1254/weather?city=" + city;
-                //String url ="https://api.meteo.lt/v1/places/" + city + "/forecasts/long-term";
+                //String url ="http://193.219.91.104:1254/weather?city=" + city;
+                String url ="https://api.meteo.lt/v1/places/" + city + "/forecasts/long-term";
 
                 JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
                     @Override
@@ -112,24 +110,24 @@ public class CityPopUpActivity extends AppCompatActivity {
             events_button.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    RequestQueue queue_events = Volley.newRequestQueue(CityPopUpActivity.this);
-                    String url_events = "http://193.219.91.104:1254/events";
-                    JsonObjectRequest request_events = new JsonObjectRequest(Request.Method.GET, url_events, null, new Response.Listener<JSONObject>() {
+                    RequestQueue queue = Volley.newRequestQueue(CityPopUpActivity.this);
+                    String url ="http://193.219.91.104:1254/weather?city=" + city; //event url
+
+                    JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
                         @Override
                         public void onResponse(JSONObject response) {
                             try {
+                                JSONArray array = response.getJSONArray("");
                                 Intent intent = new Intent(getApplicationContext(), PopWeather.class);
-                                StringBuilder s = new StringBuilder("City: Vilnius");
-                                JSONArray array = response.getJSONArray("Events");
+                                StringBuilder s = new StringBuilder("City: ");
                                 for(int i = 0; i < array.length(); i++) {
-                                    JSONObject element = (JSONObject) array.get(i);
-                                    String date = element.get("date").toString();
-                                    date = androidx.core.text.HtmlCompat.fromHtml(date, HtmlCompat.FROM_HTML_MODE_LEGACY).toString();
-                                    String title = element.get("title").toString();
-                                    title = androidx.core.text.HtmlCompat.fromHtml(title, HtmlCompat.FROM_HTML_MODE_LEGACY).toString();
-                                    String content = element.get("content").toString();
-                                    content = androidx.core.text.HtmlCompat.fromHtml(content, HtmlCompat.FROM_HTML_MODE_LEGACY).toString();
-                                    s.append("\n--------------------------------\n").append("Date: ").append(date).append("\n\nTitle: ").append(title).append("\n\nContent: \n").append(content);
+                                    JSONObject forecast = (JSONObject) array.get(i);
+                                    String forecastTimeUtc = forecast.get("forecastTimeUtc").toString();
+                                    String airTemperature = forecast.get("airTemperature").toString();
+                                    String windSpeed = forecast.get("windSpeed").toString();
+                                    String cloudCover = forecast.get("cloudCover").toString();
+                                    String conditionCode = forecast.get("conditionCode").toString();
+                                    s.append("\n--------------------------------\n").append("Forecast Time:\n").append(forecastTimeUtc).append("\nAir Temperature: ").append(airTemperature).append("\nWind Speed: ").append(windSpeed).append("\nCloud Cover: ").append(cloudCover).append("\nCondition Code: ").append(conditionCode);
                                 }
                                 intent.putExtra("Weather", s.toString());
                                 startActivity(intent);
@@ -143,8 +141,8 @@ public class CityPopUpActivity extends AppCompatActivity {
                             Toast.makeText(CityPopUpActivity.this, "ERROR", Toast.LENGTH_SHORT).show();
                         }
                     });
-                    request_events.setRetryPolicy(new DefaultRetryPolicy(60000, 1, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-                    queue_events.add(request_events);
+                    request.setRetryPolicy(new DefaultRetryPolicy(60000, 1, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+                    queue.add(request);
                 }
             });
         }

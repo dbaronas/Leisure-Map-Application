@@ -32,5 +32,4 @@
         android:layout_below="@+id/sv_location" />
 
 
-
 </RelativeLayout>
