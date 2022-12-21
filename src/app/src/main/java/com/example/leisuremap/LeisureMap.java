@@ -256,7 +256,7 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
             public boolean onMarkerClick(@NonNull Marker marker) {
                 String city = marker.getTitle();
                 String snip = marker.getSnippet();
-                if(Objects.equals(snip, "city"))
+                if(Objects.equals(snip, "city")|| Objects.equals(snip, "town"))
                 {
                     Intent intent = new Intent(getBaseContext(), CityPopUpActivity.class);
                     intent.putExtra("City", city);
@@ -423,12 +423,18 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
             Handler handler = new Handler();
             handler.postDelayed(new Runnable() {
                 public void run() {
-                    for (Marker m : objectMarkers) {
-                        if (m.getPosition().toString().equals(pos.toString()))
-                            pointToPosition(m.getPosition());
+                    for (Object o : objectList) {
+                        LatLng pos2 = new LatLng(o.getLat(), o.getLon());
+                        System.out.println("Pos1 = " + pos + " Pos2 = "  + pos2);
+                        if(pos.equals(pos2)){
+                            currentMarker = gMap.addMarker(new MarkerOptions().position(new LatLng(o.getLat(), o.getLon())).title(o.getName()).snippet(o.getType()).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
+                            pointToPosition(currentMarker.getPosition());
+                            gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentMarker.getPosition(), 15));
+                            objectMarkers.add(currentMarker);
+                        }
                     }
                 }
-            }, 7000);
+            }, 1000);
         }
     }
 }
