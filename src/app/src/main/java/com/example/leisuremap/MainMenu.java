@@ -35,7 +35,7 @@ import com.google.android.gms.tasks.Task;
 
 public class MainMenu extends AppCompatActivity {
 
-    private Button b_map, b_activities, b_sign_in;
+    private Button b_map, b_activities, b_sign_in, b_logOut, b_favorite_places;
     private LocationRequest locationRequest;
     private LatLng pos;
     boolean isLoggedIn = false;
@@ -85,12 +85,38 @@ public class MainMenu extends AppCompatActivity {
 
         b_sign_in = findViewById(R.id.signIn);
         b_sign_in.setOnClickListener(view -> openLogin());
+        b_favorite_places = findViewById(R.id.favoritePlaces);
+        b_favorite_places.setOnClickListener(view -> openFavoritePlaces());
+        b_logOut = findViewById(R.id.logOut);
+
 
         isLoggedIn = checkUserStatus();
         if (!isLoggedIn) {
             b_activities.setEnabled(false);
+            b_logOut.setEnabled(false);
+            b_favorite_places.setEnabled(false);
+        }
+        else {
+            b_sign_in.setEnabled(false);
         }
     }
+
+//    protected void onStart() {
+//        super.onStart();
+//
+//        //check if a user is logged in, if - yes, then move him to MainMenu
+//        SessionManagement sessionManagement = new SessionManagement(MainMenu.this);
+//        String un = sessionManagement.getSessionUsername();
+//        String pw = sessionManagement.getSessionPassword();
+//
+//        if (un != null && pw != null ) {
+//            Login login = new Login();
+//            login.moveToMainMenu();
+//        }
+//        else {
+//
+//        }
+//    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -139,6 +165,7 @@ public class MainMenu extends AppCompatActivity {
                                 }
                             }, Looper.getMainLooper());
                     waitForPosition();
+                    Toast.makeText(MainMenu.this, "Getting current location. Please wait.", Toast.LENGTH_SHORT).show();
                 }
                 else {
                     turnOnGPS();
@@ -212,6 +239,11 @@ public class MainMenu extends AppCompatActivity {
         startActivity(intent);
     }
 
+    public void openFavoritePlaces() {
+        Intent intent = new Intent(this, FavoritePlaces.class);
+        startActivity(intent);
+    }
+
     public boolean checkUserStatus() {
         return getIntent().getBooleanExtra("UserStatus", false);
     }
@@ -231,5 +263,15 @@ public class MainMenu extends AppCompatActivity {
 
             }
         }, 1000);
+    }
+
+    public void logOut(View view) {
+        SessionManagement sessionManagement = new SessionManagement(MainMenu.this);
+        sessionManagement.removeSession();
+
+        Intent intent = new Intent(MainMenu.this, MainMenu.class);
+        //any existing task that are associated with the activity are cleared before the activity is started
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
     }
 }
