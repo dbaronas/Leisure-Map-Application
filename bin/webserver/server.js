@@ -39,8 +39,10 @@ app.get('/events', application.api.getVilniusEvents)
 //Meteo API to get weather forecast
 app.get('/weather', application.api.getWeather)
 
-//Database tables
+//Database management
 app.get('/table', application.db.getTable)
+app.get('/saveplace', application.db.savePlace)
+//app.post('/session', application.db.searchSession)
 
 //Recommendation
 app.get('/recommendation', application.recom.getRecommendation)

@@ -9,6 +9,12 @@ const pool = new Pool({
   password: 'admin'
 })
 
+function getRandomFloat(min, max) {
+  const str = (Math.random() * (max - min) + min).toFixed(1);
+
+  return parseFloat(str);
+}
+
 const updateCities = async (req, res) => {
   let data
   let parsedData
@@ -47,7 +53,7 @@ const updateCities = async (req, res) => {
         })
       }
   
-const STATUS = {
+    const STATUS = {
       UPDATE: `Overpass API updated successfully`
     }
     res.send({STATUS})
@@ -62,29 +68,38 @@ const updateLeisure = async (req, res) => {
   })
   })
   parsedData = await JSON.parse(data)
-  await new Promise(async(resolve, reject) => {
-    for(let i = 0; i <= parsedData.elements.length - 1; i++){
+    for(let i = 0; i < parsedData.elements.length - 1; i++){
     parsedData.elements[i].tags['addr:city'] = await new Promise((resolve, reject) => {
       var point = { latitude: parsedData.elements[i].lat, longitude: parsedData.elements[i].lon }
       geocoder.lookUp(point, (err, res) => {
-      resolve(res[0][0].name)
+        if((res[0][0].name == 'Naujamiestis') || (res[0][0].name == 'Fabijoniškės') || (res[0][0].name == 'Šeškinė') || (res[0][0].name == 'Karoliniškės') ||
+        (res[0][0].name == 'Justiniškės') || (res[0][0].name == 'Lazdynai') || (res[0][0].name == 'Santariškės') || (res[0][0].name == 'Žirmūnai') || 
+        (res[0][0].name == 'Antakalnis') || (res[0][0].name == 'Viršuliškės') || (res[0][0].name == 'Senamiestis') || (res[0][0].name == 'Pašilaičiai') || (res[0][0].name == 'Baltupiai') ||
+        (res[0][0].name == 'Jaruzalė') || (res[0][0].name == 'Žvėrynas') || (res[0][0].name == 'Naujininkai') || (res[0][0].name == 'Užupis') || (res[0][0].name == 'Paupys') ||
+        (res[0][0].name == 'Bajorai') || (res[0][0].name == 'Visoriai')){
+          resolve('Vilnius')
+        }
+        if(res[0][0].name == 'Akademija (Kaunas)'){
+          resolve('Akademija')
+        }
+        if(res[0][0].name == 'Dainava (Kaunas)'){
+          resolve('Kaunas')
+        }
+        else{
+          resolve(res[0][0].name)
+        }
       })
     })
     pool.query(`SELECT EXISTS(SELECT 1 FROM place WHERE id=${parsedData.elements[i].id})`, (error, response) => {
       if(response.rows[0].exists == false){
-        pool.query(`INSERT INTO place (id, name, opening_hours, phone, website, city, lat, lon, type) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`, [parsedData.elements[i].id, parsedData.elements[i].tags.name, parsedData.elements[i].tags.opening_hours, parsedData.elements[i].tags.phone, parsedData.elements[i].tags.website, parsedData.elements[i].tags['addr:city'], parsedData.elements[i].lat, parsedData.elements[i].lon, parsedData.elements[i].tags.tourism], (error, results) => {
-          if (error) {
+        pool.query(`INSERT INTO place (id, name, opening_hours, phone, website, city, lat, lon, type, rating) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`, [parsedData.elements[i].id, parsedData.elements[i].tags.name, parsedData.elements[i].tags.opening_hours, parsedData.elements[i].tags.phone, parsedData.elements[i].tags.website, parsedData.elements[i].tags['addr:city'], parsedData.elements[i].lat, parsedData.elements[i].lon, parsedData.elements[i].tags.tourism, getRandomFloat(1.0, 5.0)], (error, results) => {
+          if(error) {
             throw error
           }
         })
       }
     })
-    if(i == parsedData.elements.length - 1){
-    resolve()
   }
-  }
-  
-  })
   
   data = await new Promise((resolve, reject) => {
     request('https://overpass-api.de/api/interpreter?data=[out:json][timeout:25];area(id:3600072596)-%3E.searchArea;(node[%22leisure%22](area.searchArea););out%20body;%3E;out%20skel%20qt;', async (error, response, data) => {
@@ -92,105 +107,127 @@ const updateLeisure = async (req, res) => {
   })
   })
   parsedData = await JSON.parse(data)
-  await new Promise(async (resolve, reject) => {
-    for(let i = 0; i <= parsedData.elements.length - 1; i++){
+    for(let i = 0; i < parsedData.elements.length - 1; i++){
     parsedData.elements[i].tags['addr:city'] = await new Promise((resolve, reject) => {
       var point = { latitude: parsedData.elements[i].lat, longitude: parsedData.elements[i].lon }
       geocoder.lookUp(point, (err, res) => {
-      resolve(res[0][0].name)
+        if((res[0][0].name == 'Naujamiestis') || (res[0][0].name == 'Fabijoniškės') || (res[0][0].name == 'Šeškinė') || (res[0][0].name == 'Karoliniškės') ||
+        (res[0][0].name == 'Justiniškės') || (res[0][0].name == 'Lazdynai') || (res[0][0].name == 'Santariškės') || (res[0][0].name == 'Žirmūnai') || 
+        (res[0][0].name == 'Antakalnis') || (res[0][0].name == 'Viršuliškės') || (res[0][0].name == 'Senamiestis') || (res[0][0].name == 'Pašilaičiai') || (res[0][0].name == 'Baltupiai') ||
+        (res[0][0].name == 'Jaruzalė') || (res[0][0].name == 'Žvėrynas') || (res[0][0].name == 'Naujininkai') || (res[0][0].name == 'Užupis') || (res[0][0].name == 'Paupys') ||
+        (res[0][0].name == 'Bajorai') || (res[0][0].name == 'Visoriai')){
+          resolve('Vilnius')
+        }
+        if(res[0][0].name == 'Akademija (Kaunas)'){
+          resolve('Akademija')
+        }
+        if(res[0][0].name == 'Dainava (Kaunas)'){
+          resolve('Kaunas')
+        }
+        else{
+          resolve(res[0][0].name)
+        }
       })
     })
     pool.query(`SELECT EXISTS(SELECT 1 FROM place WHERE id=${parsedData.elements[i].id})`, (error, response) => {
       if(response.rows[0].exists == false){
-        pool.query(`INSERT INTO place (id, name, opening_hours, phone, website, city, lat, lon, type) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`, [parsedData.elements[i].id, parsedData.elements[i].tags.name, parsedData.elements[i].tags.opening_hours, parsedData.elements[i].tags.phone, parsedData.elements[i].tags.website, parsedData.elements[i].tags['addr:city'], parsedData.elements[i].lat, parsedData.elements[i].lon, parsedData.elements[i].tags.tourism], (error, results) => {
+        pool.query(`INSERT INTO place (id, name, opening_hours, phone, website, city, lat, lon, type, rating) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`, [parsedData.elements[i].id, parsedData.elements[i].tags.name, parsedData.elements[i].tags.opening_hours, parsedData.elements[i].tags.phone, parsedData.elements[i].tags.website, parsedData.elements[i].tags['addr:city'], parsedData.elements[i].lat, parsedData.elements[i].lon, parsedData.elements[i].tags.leisure, getRandomFloat(1.0, 5.0)], (error, results) => {
           if (error) {
             throw error
           }
         })
       }
     })
-    if(i == parsedData.elements.length - 1){
-      resolve()
-    }
   }
-  })
 
-const STATUS = {
-  UPDATE: `Overpass API updated successfully`
-}
-res.send({STATUS})
+res.redirect('/update/overpassapi/restaurants')
 }
 
 const updateRestaurant = async (req, res) => {
   let data
   let parsedData
-
-  data = await new Promise((resolve, reject) => {
-    request('https://overpass-api.de/api/interpreter?data=[out:json][timeout:25];area(id:3600072596)-%3E.searchArea;(node[%22amenity%22=%22restaurant%22](area.searchArea););out%20body;%3E;out%20skel%20qt;', async (error, response, data) => {
-    resolve(data)
-  })
-  })
-  parsedData = await JSON.parse(data)
-  await new Promise(async (resolve, reject) => {
-    for(let i = 0; i <= parsedData.elements.length - 1; i++){
-    parsedData.elements[i].tags['addr:city'] = await new Promise((resolve, reject) => {
-      var point = { latitude: parsedData.elements[i].lat, longitude: parsedData.elements[i].lon }
-      geocoder.lookUp(point, (err, res) => {
-      resolve(res[0][0].name)
-      })
-    })
-
-    pool.query(`SELECT EXISTS(SELECT 1 FROM place WHERE id=${parsedData.elements[i].id})`, (error, response) => {
-      if(response.rows[0].exists == false){
-        pool.query(`INSERT INTO place (id, name, opening_hours, phone, website, city, lat, lon, type) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`, [parsedData.elements[i].id, parsedData.elements[i].tags.name, parsedData.elements[i].tags.opening_hours, parsedData.elements[i].tags.phone, parsedData.elements[i].tags.website, parsedData.elements[i].tags['addr:city'], parsedData.elements[i].lat, parsedData.elements[i].lon, parsedData.elements[i].tags.amenity], (error, results) => {
-          if (error) {
-            throw error
-          }
-        })
-      }
-    })
-    if(i == parsedData.elements.length - 1){
-    resolve()
-  }
-  }
-  
-  })
-  
   data = await new Promise((resolve, reject) => {
     request('https://overpass-api.de/api/interpreter?data=[out:json][timeout:25];area(id:3600072596)-%3E.searchArea;(node[%22amenity%22=%22fast_food%22](area.searchArea););out%20body;%3E;out%20skel%20qt;', async (error, response, data) => {
     resolve(data)
   })
   })
   parsedData = await JSON.parse(data)
-  await new Promise(async(resolve, reject) => {
-    for(let i = 0; i <= parsedData.elements.length - 1; i++){
+    for(let i = 0; i < parsedData.elements.length - 1; i++){
     parsedData.elements[i].tags['addr:city'] = await new Promise((resolve, reject) => {
       var point = { latitude: parsedData.elements[i].lat, longitude: parsedData.elements[i].lon }
       geocoder.lookUp(point, (err, res) => {
-      resolve(res[0][0].name)
+        if((res[0][0].name == 'Naujamiestis') || (res[0][0].name == 'Fabijoniškės') || (res[0][0].name == 'Šeškinė') || (res[0][0].name == 'Karoliniškės') ||
+        (res[0][0].name == 'Justiniškės') || (res[0][0].name == 'Lazdynai') || (res[0][0].name == 'Santariškės') || (res[0][0].name == 'Žirmūnai') || 
+        (res[0][0].name == 'Antakalnis') || (res[0][0].name == 'Viršuliškės') || (res[0][0].name == 'Senamiestis') || (res[0][0].name == 'Pašilaičiai') || (res[0][0].name == 'Baltupiai') ||
+        (res[0][0].name == 'Jaruzalė') || (res[0][0].name == 'Žvėrynas') || (res[0][0].name == 'Naujininkai') || (res[0][0].name == 'Užupis') || (res[0][0].name == 'Paupys') ||
+        (res[0][0].name == 'Bajorai') || (res[0][0].name == 'Visoriai')){
+          resolve('Vilnius')
+        }
+        if(res[0][0].name == 'Akademija (Kaunas)'){
+          resolve('Akademija')
+        }
+        if(res[0][0].name == 'Dainava (Kaunas)'){
+          resolve('Kaunas')
+        }
+        else{
+          resolve(res[0][0].name)
+        }
       })
     })
     pool.query(`SELECT EXISTS(SELECT 1 FROM place WHERE id=${parsedData.elements[i].id})`, (error, response) => {
       if(response.rows[0].exists == false){
-        pool.query(`INSERT INTO place (id, name, opening_hours, phone, website, city, lat, lon, type) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`, [parsedData.elements[i].id, parsedData.elements[i].tags.name, parsedData.elements[i].tags.opening_hours, parsedData.elements[i].tags.phone, parsedData.elements[i].tags.website, parsedData.elements[i].tags['addr:city'], parsedData.elements[i].lat, parsedData.elements[i].lon, parsedData.elements[i].tags.amenity], (error, results) => {
+        pool.query(`INSERT INTO place (id, name, opening_hours, phone, website, city, lat, lon, type, rating) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`, [parsedData.elements[i].id, parsedData.elements[i].tags.name, parsedData.elements[i].tags.opening_hours, parsedData.elements[i].tags.phone, parsedData.elements[i].tags.website, parsedData.elements[i].tags['addr:city'], parsedData.elements[i].lat, parsedData.elements[i].lon, parsedData.elements[i].tags.amenity, getRandomFloat(1.0, 5.0)], (error, results) => {
           if (error) {
             throw error
           }
         })
       }
     })
-    if(i == parsedData.elements.length - 1){
-    resolve()
-  }
   }
   
+  data = await new Promise((resolve, reject) => {
+    request('https://overpass-api.de/api/interpreter?data=[out:json][timeout:25];area(id:3600072596)-%3E.searchArea;(node[%22amenity%22=%22restaurant%22](area.searchArea););out%20body;%3E;out%20skel%20qt;', async (error, response, data) => {
+    resolve(data)
   })
-  
-const STATUS = {
-  UPDATE: `Overpass API updated successfully`
+  })
+  parsedData = await JSON.parse(data)
+    for(let i = 0; i < parsedData.elements.length - 1; i++){
+    parsedData.elements[i].tags['addr:city'] = await new Promise((resolve, reject) => {
+      var point = { latitude: parsedData.elements[i].lat, longitude: parsedData.elements[i].lon }
+      geocoder.lookUp(point, (err, res) => {
+        if((res[0][0].name == 'Naujamiestis') || (res[0][0].name == 'Fabijoniškės') || (res[0][0].name == 'Šeškinė') || (res[0][0].name == 'Karoliniškės') ||
+        (res[0][0].name == 'Justiniškės') || (res[0][0].name == 'Lazdynai') || (res[0][0].name == 'Santariškės') || (res[0][0].name == 'Žirmūnai') || 
+        (res[0][0].name == 'Antakalnis') || (res[0][0].name == 'Viršuliškės') || (res[0][0].name == 'Senamiestis') || (res[0][0].name == 'Pašilaičiai') || (res[0][0].name == 'Baltupiai') ||
+        (res[0][0].name == 'Jaruzalė') || (res[0][0].name == 'Žvėrynas') || (res[0][0].name == 'Naujininkai') || (res[0][0].name == 'Užupis') || (res[0][0].name == 'Paupys') ||
+        (res[0][0].name == 'Bajorai') || (res[0][0].name == 'Visoriai')){
+          resolve('Vilnius')
+        }
+        if(res[0][0].name == 'Akademija (Kaunas)'){
+          resolve('Akademija')
+        }
+        if(res[0][0].name == 'Dainava (Kaunas)'){
+          resolve('Kaunas')
+        }
+        else{
+          resolve(res[0][0].name)
+        }
+      })
+    })
+    pool.query(`SELECT EXISTS(SELECT 1 FROM place WHERE id=${parsedData.elements[i].id})`, (error, response) => {
+      if(response.rows[0].exists == false){
+        pool.query(`INSERT INTO place (id, name, opening_hours, phone, website, city, lat, lon, type, rating) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`, [parsedData.elements[i].id, parsedData.elements[i].tags.name, parsedData.elements[i].tags.opening_hours, parsedData.elements[i].tags.phone, parsedData.elements[i].tags.website, parsedData.elements[i].tags['addr:city'], parsedData.elements[i].lat, parsedData.elements[i].lon, parsedData.elements[i].tags.amenity, getRandomFloat(1.0, 5.0)], (error, results) => {
+
+        })
+      }
+    })
+  }
+
+  const STATUS = {
+    UPDATE: `Overpass API updated successfully`
+  }
+  res.send({STATUS})
 }
-res.send({STATUS})
-}
+
 
 module.exports = {
     updateCities,

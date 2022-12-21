@@ -24,7 +24,7 @@ const login = (req, res) => {
              else {
                 const STATUS = {
                 LOGIN: false,
-                message: 'Username/password is incorrect.'
+                message: 'Password is incorrect.'
              }
                 res.send({STATUS})
         }

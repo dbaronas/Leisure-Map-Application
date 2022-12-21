@@ -77,7 +77,7 @@ const getWeather = async (req, res) => {
 const getVilniusEvents = async (req, res) => {
   let api
   if(cache.has(1) == true){
-    res.json(cache.get(1))
+    res.json({Events: cache.get(1)})
   }
   else{
     const url = 'https://www.vilnius-events.lt/api/'
@@ -86,7 +86,7 @@ const getVilniusEvents = async (req, res) => {
     if (!error && response.statusCode == 200) {
       api = JSON.parse(data)
       cache.set(1, api)
-      res.send(api)
+      res.json({Events: api})
     }
     else{
     res.status(404).json({error: 'error'})

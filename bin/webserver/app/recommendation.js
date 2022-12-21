@@ -1,5 +1,4 @@
 const pcc = require("calculate-correlation")
-const correlation = require("calculate-correlation/lib/correlation")
 const Pool = require('pg').Pool
 const pool = new Pool({
   user: 'admin',
@@ -25,7 +24,7 @@ const getRecommendation = (req, res) => {
         for(let i = 0; i <= 44; i++){
             userArray[i] = results.rows[0][`${i + 1}`]
         }
-        pool.query(`SELECT * FROM getTags WHERE username NOT IN ('${username}')`, async (error, results2) => {
+        pool.query(`SELECT * FROM getTags WHERE username NOT IN ('${username}')`, (error, results2) => {
             if(error){
                 throw error
             }
