@@ -16,6 +16,9 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    testOptions {
+        unitTests.returnDefaultValues = true
+    }
     buildTypes {
         release {
             minifyEnabled false
@@ -26,6 +29,7 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+
 }
 
 dependencies {
@@ -44,4 +48,7 @@ dependencies {
     androidTestImplementation "io.mockk:mockk-android:1.11.0"
     androidTestImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.1"
     androidTestImplementation "io.insert-koin:koin-test-junit4:3.0.2"
+    testImplementation "android.arch.core:core-testing:1.0.0"
+    testImplementation "android.arch.persistence.room:testing:1.0.0"
+
 }

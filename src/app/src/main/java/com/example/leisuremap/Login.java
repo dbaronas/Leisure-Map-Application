@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -68,6 +69,24 @@ public class Login extends AppCompatActivity {
         password = findViewById(R.id.inputPassword);
     }
 
+
+    protected void onStart() {
+        super.onStart();
+
+        //check if a user is logged in, if - yes, then move him to MainMenu
+        SessionManagement sessionManagement = new SessionManagement(Login.this);
+        String un = sessionManagement.getSessionUsername();
+        String pw = sessionManagement.getSessionPassword();
+
+        if (un != null && pw != null ) {
+            Login login = new Login();
+            login.moveToMainMenu();
+        }
+        else {
+
+        }
+    }
+
     public void openForgotPass() {
         Intent intent = new Intent(this, ChangePassword.class);
         startActivity(intent);
@@ -127,4 +146,20 @@ public class Login extends AppCompatActivity {
         });
         queue.add(request);
     }
+
+    //log in to app and save the session of a user and move user to leisuremap activity
+    public void saveLoggedInSession(View view){
+        SessionManagement sessionManagement = new SessionManagement(Login.this);
+        sessionManagement.saveSession(username.getText().toString(), password.getText().toString());
+        moveToMainMenu();
+    }
+
+    public void moveToMainMenu(){
+        Intent intent = new Intent(Login.this, MainMenu.class);
+        //any existing task that are associated with the activity are cleared before the activity is started
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+    }
+
+
 }

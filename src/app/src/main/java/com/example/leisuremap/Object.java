@@ -5,13 +5,13 @@ public class Object {
     private double distance;
     private double lat;
     private double lon;
-    private int rating;
+    private double rating;
     private String city;
     private String type;
     private double score;
     private String distanceString;
 
-    public Object(String name, double distance, double lat, double lon, int rating, String city, String type, double score) {
+    public Object(String name, double distance, double lat, double lon, double rating, String city, String type, double score) {
         this.name = name;
         this.distance = distance;
         this.lat = lat;
@@ -70,11 +70,11 @@ public class Object {
         this.score = score;
     }
 
-    public int getRating() {
+    public double getRating() {
         return rating;
     }
 
-    public void setRating(int rating) {
+    public void setRating(double rating) {
         this.rating = rating;
     }
 
