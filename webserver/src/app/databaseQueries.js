@@ -1,4 +1,3 @@
-const Pool = require('pg').Pool
 const pool = require('./database')
 const getTable = (req, res) => {
   const name = req.query.name

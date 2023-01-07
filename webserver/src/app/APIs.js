@@ -1,7 +1,6 @@
 const request = require('request')
 const overpass = require('./overpass/export')
 const LRU = require('lru-cache')
-const Pool = require('pg').Pool
 const pool = require('./database')
 
 const options = {

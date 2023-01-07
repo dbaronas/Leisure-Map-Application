@@ -1,5 +1,4 @@
 const pcc = require("calculate-correlation")
-const Pool = require('pg').Pool
 const pool = require('./database')
 const getRecommendation = (req, res) => {
     const username = req.query.username

@@ -1,6 +1,5 @@
 const request = require('request')
 const geocoder = require('local-reverse-geocoder')
-const Pool = require('pg').Pool
 const pool = require('./database')
 
 function getRandomFloat(min, max) {
