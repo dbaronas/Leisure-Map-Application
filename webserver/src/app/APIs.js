@@ -2,13 +2,7 @@ const request = require('request')
 const overpass = require('./overpass/export')
 const LRU = require('lru-cache')
 const Pool = require('pg').Pool
-const pool = new Pool({
-  user: 'admin',
-  host: '193.219.91.103',
-  port: 9170,
-  database: 'pblDB',
-  password: 'admin'
-})
+const pool = require('./database')
 
 const options = {
 

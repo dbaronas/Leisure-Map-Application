@@ -1,11 +1,5 @@
 const Pool = require('pg').Pool
-const pool = new Pool({
-  user: 'admin',
-  host: '193.219.91.103',
-  port: 9170,
-  database: 'pblDB',
-  password: 'admin'
-})
+const pool = require('./database')
 
 const login = (req, res) => {
     const username = req.query.username

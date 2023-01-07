@@ -1,11 +1,5 @@
 const Pool = require('pg').Pool
-const pool = new Pool({
-  user: 'admin',
-  host: '193.219.91.103',
-  port: 9170,
-  database: 'pblDB',
-  password: 'admin'
-})
+const pool = require('./database')
 const getTable = (req, res) => {
   const name = req.query.name
   pool.query(`SELECT EXISTS (SELECT FROM pg_tables WHERE schemaname = 'public' AND tablename = '${name}')`, (error, results) => {

@@ -1,13 +1,6 @@
 const Pool = require('pg').Pool
 const request = require('request')
-const pool = new Pool({
-  user: 'admin',
-  host: '193.219.91.103',
-  port: 9170,
-  database: 'pblDB',
-  password: 'admin'
-})
-
+const pool = require('../app/database')
 const testConnections = async(req, res) => {
 var isConnectionSuccessful = {
     Database: false,
