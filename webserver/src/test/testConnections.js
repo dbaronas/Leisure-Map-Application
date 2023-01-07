@@ -1,4 +1,3 @@
-const Pool = require('pg').Pool
 const request = require('request')
 const pool = require('../app/database')
 const testConnections = async(req, res) => {
