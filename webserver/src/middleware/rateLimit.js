@@ -4,7 +4,7 @@ const STATUS = {
 }
 
 const limiter = rateLimit({
-	windowMs: 60 * 60 * 1000,
+	windowMs: 60 * 10 * 1000,
 	max: 3,
 	message: {STATUS},
 	standardHeaders: true,
@@ -13,7 +13,7 @@ const limiter = rateLimit({
 
 const limiter2 = rateLimit({
 	windowMs: 60 * 60 * 1000,
-	max: 2,
+	max: 1,
 	message: {STATUS},
 	standardHeaders: true,
 	legacyHeaders: false,
