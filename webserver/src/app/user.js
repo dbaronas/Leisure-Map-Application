@@ -1,13 +1,15 @@
 const pool = require('./database')
+const bcrypt = require('bcrypt')
 
 const login = (req, res) => {
-    const username = req.query.username
+    const data = req.query.username
+    const username = data.toLowerCase()
     const pass = req.query.pass
 
     pool.query(`SELECT EXISTS(SELECT 1 FROM users WHERE username='${username}')`, (error, results) => {
         if(results.rows[0].exists == true){
             pool.query(`SELECT password FROM users WHERE username='${username}'`, (error, results) => {
-            if(results.rows[0].password == pass){
+            if(bcrypt.compareSync(pass, results.rows[0].password) == true){
                 const STATUS = {
                     LOGIN: true,
                     message: 'You logged in successfully!'
@@ -34,7 +36,8 @@ const login = (req, res) => {
 }
 
 const createUser = (req, res) => {
-    const username = req.query.username
+  const data = req.query.username
+  const username = data.toLowerCase()
     const pass = req.query.pass
 
 
@@ -74,16 +77,15 @@ function getRandomInt(max) {
 }
   
 const updateUser = (req, res) => {
-    const username = req.query.username
+    const data = req.query.username
+    const username = data.toLowerCase()
     const oldpass = req.query.oldpass
     const newpass = req.query.newpass
 
     pool.query(`SELECT password FROM users WHERE username = '${username}'`, (error, results) => {
-      if(results.rows[0].password == oldpass){
+      if(bcrypt.compareSync(oldpass, results.rows[0].password) == true){
         pool.query(
-          'UPDATE users SET password = $1 WHERE username = $2',
-          [newpass, username],
-          (error, results) => {
+          'UPDATE users SET password = $1 WHERE username = $2', [newpass, username], (error, results) => {
             if (error) {
               res.send(error)
             }
@@ -109,7 +111,8 @@ const updateUser = (req, res) => {
 }
   
 const deleteUser = (req, res) => {
-    const username = req.query.username
+  const data = req.query.username
+  const username = data.toLowerCase()
   
     pool.query('DELETE FROM users WHERE username = $1', [username], (error, results) => {
       if (error) {

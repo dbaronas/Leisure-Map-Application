@@ -11,6 +11,7 @@
   "author": "Kernel Technologies",
   "license": "ISC",
   "dependencies": {
+    "bcrypt": "^5.1.0",
     "body-parser": "^1.20.1",
     "calculate-correlation": "^1.2.3",
     "chai": "^4.3.7",

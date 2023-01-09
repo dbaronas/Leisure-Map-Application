@@ -46,6 +46,7 @@ app.get('/saveplace', application.db.savePlace)
 
 //Recommendation
 app.get('/recommendation', application.recom.getRecommendation)
+app.get('/recommendation/recordtag', application.recom.incTag)
 
 app.listen(port, () => {
     console.log(`App running on port ${port}.`)
