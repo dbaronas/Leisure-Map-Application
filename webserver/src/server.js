@@ -41,7 +41,9 @@ app.get('/weather', application.api.getWeather)
 
 //Database management
 app.get('/table', application.db.getTable)
+app.get('/view', application.db.getView)
 app.get('/saveplace', application.db.savePlace)
+app.get('/rateplace', application.db.ratePlace)
 //app.post('/session', application.db.searchSession)
 
 //Recommendation

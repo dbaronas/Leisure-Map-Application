@@ -2,11 +2,6 @@ const request = require('request')
 const geocoder = require('local-reverse-geocoder')
 const pool = require('./database')
 
-function getRandomFloat(min, max) {
-  const str = (Math.random() * (max - min) + min).toFixed(1);
-
-  return parseFloat(str);
-}
 
 const updateCities = async (req, res) => {
   let data
@@ -85,7 +80,7 @@ const updateLeisure = async (req, res) => {
     })
     pool.query(`SELECT EXISTS(SELECT 1 FROM place WHERE id=${parsedData.elements[i].id})`, (error, response) => {
       if(response.rows[0].exists == false){
-        pool.query(`INSERT INTO place (id, name, opening_hours, phone, website, city, lat, lon, type, rating) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`, [parsedData.elements[i].id, parsedData.elements[i].tags.name, parsedData.elements[i].tags.opening_hours, parsedData.elements[i].tags.phone, parsedData.elements[i].tags.website, parsedData.elements[i].tags['addr:city'], parsedData.elements[i].lat, parsedData.elements[i].lon, parsedData.elements[i].tags.tourism, getRandomFloat(1.0, 5.0)], (error, results) => {
+        pool.query(`INSERT INTO place (id, name, opening_hours, phone, website, city, lat, lon, type) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`, [parsedData.elements[i].id, parsedData.elements[i].tags.name, parsedData.elements[i].tags.opening_hours, parsedData.elements[i].tags.phone, parsedData.elements[i].tags.website, parsedData.elements[i].tags['addr:city'], parsedData.elements[i].lat, parsedData.elements[i].lon, parsedData.elements[i].tags.tourism], (error, results) => {
           if(error) {
             throw error
           }
@@ -124,7 +119,7 @@ const updateLeisure = async (req, res) => {
     })
     pool.query(`SELECT EXISTS(SELECT 1 FROM place WHERE id=${parsedData.elements[i].id})`, (error, response) => {
       if(response.rows[0].exists == false){
-        pool.query(`INSERT INTO place (id, name, opening_hours, phone, website, city, lat, lon, type, rating) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`, [parsedData.elements[i].id, parsedData.elements[i].tags.name, parsedData.elements[i].tags.opening_hours, parsedData.elements[i].tags.phone, parsedData.elements[i].tags.website, parsedData.elements[i].tags['addr:city'], parsedData.elements[i].lat, parsedData.elements[i].lon, parsedData.elements[i].tags.leisure, getRandomFloat(1.0, 5.0)], (error, results) => {
+        pool.query(`INSERT INTO place (id, name, opening_hours, phone, website, city, lat, lon, type) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`, [parsedData.elements[i].id, parsedData.elements[i].tags.name, parsedData.elements[i].tags.opening_hours, parsedData.elements[i].tags.phone, parsedData.elements[i].tags.website, parsedData.elements[i].tags['addr:city'], parsedData.elements[i].lat, parsedData.elements[i].lon, parsedData.elements[i].tags.leisure], (error, results) => {
           if (error) {
             throw error
           }
@@ -169,7 +164,7 @@ const updateRestaurant = async (req, res) => {
     })
     pool.query(`SELECT EXISTS(SELECT 1 FROM place WHERE id=${parsedData.elements[i].id})`, (error, response) => {
       if(response.rows[0].exists == false){
-        pool.query(`INSERT INTO place (id, name, opening_hours, phone, website, city, lat, lon, type, rating) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`, [parsedData.elements[i].id, parsedData.elements[i].tags.name, parsedData.elements[i].tags.opening_hours, parsedData.elements[i].tags.phone, parsedData.elements[i].tags.website, parsedData.elements[i].tags['addr:city'], parsedData.elements[i].lat, parsedData.elements[i].lon, parsedData.elements[i].tags.amenity, getRandomFloat(1.0, 5.0)], (error, results) => {
+        pool.query(`INSERT INTO place (id, name, opening_hours, phone, website, city, lat, lon, type) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`, [parsedData.elements[i].id, parsedData.elements[i].tags.name, parsedData.elements[i].tags.opening_hours, parsedData.elements[i].tags.phone, parsedData.elements[i].tags.website, parsedData.elements[i].tags['addr:city'], parsedData.elements[i].lat, parsedData.elements[i].lon, parsedData.elements[i].tags.amenity], (error, results) => {
           if (error) {
             throw error
           }
@@ -208,7 +203,7 @@ const updateRestaurant = async (req, res) => {
     })
     pool.query(`SELECT EXISTS(SELECT 1 FROM place WHERE id=${parsedData.elements[i].id})`, (error, response) => {
       if(response.rows[0].exists == false){
-        pool.query(`INSERT INTO place (id, name, opening_hours, phone, website, city, lat, lon, type, rating) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`, [parsedData.elements[i].id, parsedData.elements[i].tags.name, parsedData.elements[i].tags.opening_hours, parsedData.elements[i].tags.phone, parsedData.elements[i].tags.website, parsedData.elements[i].tags['addr:city'], parsedData.elements[i].lat, parsedData.elements[i].lon, parsedData.elements[i].tags.amenity, getRandomFloat(1.0, 5.0)], (error, results) => {
+        pool.query(`INSERT INTO place (id, name, opening_hours, phone, website, city, lat, lon, type) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`, [parsedData.elements[i].id, parsedData.elements[i].tags.name, parsedData.elements[i].tags.opening_hours, parsedData.elements[i].tags.phone, parsedData.elements[i].tags.website, parsedData.elements[i].tags['addr:city'], parsedData.elements[i].lat, parsedData.elements[i].lon, parsedData.elements[i].tags.amenity], (error, results) => {
 
         })
       }

@@ -1,9 +1,29 @@
 const pool = require('./database')
+const math = require('exact-math')
 const getTable = (req, res) => {
   const name = req.query.name
   pool.query(`SELECT EXISTS (SELECT FROM pg_tables WHERE schemaname = 'public' AND tablename = '${name}')`, (error, results) => {
     if(results.rows[0].exists == false){
       res.json({ERROR: `Table ${name} does not exist`})
+    }
+    else{
+      pool.query(`SELECT * FROM ${name}`, (error, results) => {
+        if (error) {
+          res.send(err)
+        }
+        else{
+        res.send({Table: results.rows})
+        } 
+      })
+    }
+  })
+}
+
+const getView = (req, res) => {
+  const name = req.query.name
+  pool.query(`SELECT EXISTS (SELECT FROM pg_views WHERE schemaname = 'public' AND viewname = '${name}')`, (error, results) => {
+    if(results.rows[0].exists == false){
+      res.json({ERROR: `View ${name} does not exist`})
     }
     else{
       pool.query(`SELECT * FROM ${name}`, (error, results) => {
@@ -33,6 +53,28 @@ const savePlace = (req, res) => {
   })
 }
 
+const ratePlace = (req, res) => {
+  const id = req.query.id
+  const rating = req.query.rating
+
+  pool.query(`SELECT * FROM place_rating WHERE place_id=${id}`, (error, results) => {
+    if(error){
+      throw error
+    }
+
+    const newRating = math.div(math.add(math.mul(results.rows[0].rating, results.rows[0].count), rating), results.rows[0].count + 1)
+
+    pool.query(`UPDATE place_rating SET rating=${newRating}, count=${results.rows[0].count + 1} WHERE place_id=${id}`, (error) => {
+      if(error){
+        throw error
+      }
+      const STATUS = `Thank you fro your feedback!`
+      res.send({STATUS})
+    })
+  })
+  
+}
+
 /*const searchSession = (req, res) => {
   const username = req.body.username
   const start = req.body.start
@@ -52,6 +94,8 @@ const savePlace = (req, res) => {
 
 module.exports = {
   getTable,
+  getView,
   savePlace,
+  ratePlace
   //searchSession
 }
