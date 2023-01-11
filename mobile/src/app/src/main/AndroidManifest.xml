@@ -23,8 +23,18 @@
             android:value="@string/map_key" />
 
         <activity
-            android:name=".CityPopUpActivity"
+            android:name=".ObjectPopUp"
             android:exported="false"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.Transparent">
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
+        <activity
+            android:name=".CityPopUp"
+            android:exported="false"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.Transparent">
             <meta-data
                 android:name="android.app.lib_name"
@@ -33,6 +43,7 @@
         <activity
             android:name=".PopWeather"
             android:exported="false"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.Transparent">
             <meta-data
                 android:name="android.app.lib_name"
@@ -40,49 +51,56 @@
         </activity>
         <activity
             android:name=".FindActivities"
-            android:exported="false">
+            android:exported="false"
+            android:screenOrientation="portrait">
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="" />
         </activity>
         <activity
             android:name=".LeisureMap"
-            android:exported="false">
+            android:exported="false"
+            android:screenOrientation="portrait">
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="" />
         </activity>
         <activity
             android:name=".FavoritePlaces"
-            android:exported="false">
+            android:exported="false"
+            android:screenOrientation="portrait">
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="" />
         </activity>
         <activity
             android:name=".Login"
-            android:exported="false">
+            android:exported="false"
+            android:screenOrientation="portrait">
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="" />
         </activity>
         <activity
             android:name=".SignUp"
-            android:exported="false">
+            android:exported="false"
+            android:screenOrientation="portrait">
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="" />
         </activity>
         <activity
             android:name=".ChangePassword"
-            android:exported="false">
+            android:exported="false"
+            android:screenOrientation="portrait">
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="" />
         </activity>
         <activity
             android:name=".MainMenu"
-            android:exported="true">
+            android:exported="true"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

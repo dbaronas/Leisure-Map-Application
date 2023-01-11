@@ -1,6 +1,7 @@
 package com.example.leisuremap;
 
 public class Object {
+    private int id;
     private String name;
     private double distance;
     private double lat;
@@ -22,12 +23,22 @@ public class Object {
         this.score = score;
     }
 
-    public Object(String name, double lat, double lon, String type, String distanceString) {
+    public Object(String name, double lat, double lon, String type, String distanceString, String city, int id) {
+        this.id = id;
         this.name = name;
         this.lat = lat;
         this.lon = lon;
         this.type = type;
         this.distanceString = distanceString;
+        this.city = city;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public double getDistance() {

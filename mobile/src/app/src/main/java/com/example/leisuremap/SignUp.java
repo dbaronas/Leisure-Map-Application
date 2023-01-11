@@ -82,7 +82,7 @@ public class SignUp extends AppCompatActivity {
     public void signUp(String username, String password){
 
         RequestQueue queue = Volley.newRequestQueue(this);
-        String url = "http://193.219.91.104:1254/user/create?username="+username+"&pass="+password;
+        String url = "http://193.219.91.103:16059/user/create?username="+username+"&pass="+password;
 
         Intent intent = new Intent(this, MainMenu.class);
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
@@ -97,6 +97,7 @@ public class SignUp extends AppCompatActivity {
                 if(accCreated) {
                     guideText.setText("Account created");
                     intent.putExtra("UserStatus", accCreated);
+                    intent.putExtra("Username", username);
                     startActivity(intent);
                     Login.fa.finish();
                     MainMenu.fa.finish();

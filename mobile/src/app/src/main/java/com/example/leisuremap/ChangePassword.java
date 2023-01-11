@@ -84,7 +84,7 @@ public class ChangePassword extends AppCompatActivity {
 
     public void changePass(String username, String crPassword, String newPassword) {
         RequestQueue queue = Volley.newRequestQueue(this);
-        String url = "http://193.219.91.104:1254/user/update?username=" + username + "&oldpass=" + crPassword + "&newpass=" + newPassword;
+        String url = "http://193.219.91.103:16059/user/update?username=" + username + "&oldpass=" + crPassword + "&newpass=" + newPassword;
 
         Intent intent = new Intent(this, MainMenu.class);
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {

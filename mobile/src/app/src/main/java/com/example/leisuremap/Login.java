@@ -114,7 +114,7 @@ public class Login extends AppCompatActivity {
     //client will send the data to the server in a form of url - GET request, query parameters will be present inside URL
     public void logIn(String username, String password) {
         RequestQueue queue = Volley.newRequestQueue(this);
-        String url = "http://193.219.91.104:1254/user/login?username=" + username + "&pass=" + password;
+        String url = "http://193.219.91.103:16059/user/login?username=" + username + "&pass=" + password;
 
         Intent intent = new Intent(this, MainMenu.class);
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
@@ -131,6 +131,7 @@ public class Login extends AppCompatActivity {
                         if(isLoggedIn) {
                             guideText.setText("Logged in");
                             intent.putExtra("UserStatus", isLoggedIn);
+                            intent.putExtra("Username", username);
                             startActivity(intent);
                             MainMenu.fa.finish();
                             finish();

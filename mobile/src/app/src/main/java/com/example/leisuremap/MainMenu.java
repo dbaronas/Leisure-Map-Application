@@ -40,7 +40,7 @@ public class MainMenu extends AppCompatActivity {
     private LatLng pos;
     boolean isLoggedIn = false;
     public static Activity fa;
-    int i;
+    int i; //activity type
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,10 +83,20 @@ public class MainMenu extends AppCompatActivity {
             }
         });
 
+        b_favorite_places.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(pos == null){
+                    getCurrentLocation();
+                    i = 2;
+                }
+                else
+                    openFavoritePlaces();
+            }
+        });
+
         b_sign_in = findViewById(R.id.signIn);
-        b_sign_in.setOnClickListener(view -> openLogin());
         b_favorite_places = findViewById(R.id.favoritePlaces);
-        b_favorite_places.setOnClickListener(view -> openFavoritePlaces());
         b_logOut = findViewById(R.id.logOut);
 
 
@@ -257,9 +267,11 @@ public class MainMenu extends AppCompatActivity {
                 else if (i==0){
                     openActivities();
                 }
-                else {
+                else if (i==1){
                     openLeisureMap();
                 }
+                else
+                    openFavoritePlaces();
 
             }
         }, 1000);
