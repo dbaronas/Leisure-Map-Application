@@ -34,6 +34,10 @@ import java.util.List;
 public class FavoritePlaces extends AppCompatActivity {
 
     List<Object> objects = new ArrayList<>();
+    LatLng userPos;
+
+    boolean isLoggedIn = false;
+    String username;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,16 +45,18 @@ public class FavoritePlaces extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_favorite_places);
 
-        LatLng userPos = getIntent().getParcelableExtra("Pos");
+        userPos = getIntent().getParcelableExtra("UserPos");
+        isLoggedIn = checkUserStatus();
+        username = checkUsername();
 
         RequestQueue queue_objects = Volley.newRequestQueue(FavoritePlaces.this);
-        String url_objects = "http://193.219.91.103:16059/view?name=place";
+        String url_objects = "http://193.219.91.103:16059/getfavourite?username=" + username;
         JsonObjectRequest request_objects = new JsonObjectRequest(Request.Method.GET, url_objects, null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
                 try {
-                    JSONArray array = response.getJSONArray("Table");
-                    for(int i = 0; i < array.length() - 1; i++) {
+                    JSONArray array = response.getJSONArray("Places");
+                    for(int i = 0; i < array.length(); i++) {
                         JSONObject element = (JSONObject) array.get(i);
                         String latitude = element.get("lat").toString();
                         String longitude = element.get("lon").toString();
@@ -59,8 +65,6 @@ public class FavoritePlaces extends AppCompatActivity {
                         LatLng pos = new LatLng(lat, lon);
                         String objType = element.get("type").toString();
                         String objName = element.get("name").toString();
-                        String rating = element.get("rating").toString();
-                        double objRating = Double.parseDouble(rating);
 
                         if(objName.equals("null"))
                             objName = objType;
@@ -82,9 +86,8 @@ public class FavoritePlaces extends AppCompatActivity {
                         endPoint.setLongitude(pos.longitude);
 
                         double distance=startPoint.distanceTo(endPoint) / 1000;
-                        double score = (10 - Math.sqrt(distance)) * 2 + (objRating * 2);
 
-                        Object obj = new Object(objName, distance, lat, lon, objRating, objCity, objType, score);
+                        Object obj = new Object(objName, distance, objCity, objType, lat, lon);
                         objects.add(obj);
                     }
                 } catch (JSONException e) {
@@ -92,6 +95,7 @@ public class FavoritePlaces extends AppCompatActivity {
                 }
                 sortList();
                 for(Object o:objects) {
+                    System.out.println(o);
                     createTextViews(o);
                 }
             }
@@ -116,8 +120,7 @@ public class FavoritePlaces extends AppCompatActivity {
         textView.setBackgroundDrawable(getResources().getDrawable(R.drawable.pop_up_style));
         textView.setTextColor(Color.BLACK);
         String formatDist = String.format("%.1f", object.getDistance());
-        String formatScore = String.format("%.1f", object.getScore());
-        textView.setText("Name: " + object.getName() + "\nDistance: " + formatDist + " km, " + "Rating: " + object.getRating() + " stars, " + "City: " + object.getCity() + ", Type: " + object.getType() + ", Score: " + formatScore);
+        textView.setText("Name: " + object.getName() + "\nDistance: " + formatDist + " km, " + "City: " + object.getCity() + ", Type: " + object.getType());
         textView.setPadding(20, 20, 20, 20);
         textView.setGravity(Gravity.CENTER);
         textView.setOnClickListener(new View.OnClickListener() {
@@ -125,6 +128,9 @@ public class FavoritePlaces extends AppCompatActivity {
             public void onClick(View view) {
                 Intent intent = new Intent(getBaseContext(), LeisureMap.class);
                 intent.putExtra("Position", pos);
+                intent.putExtra("UserPos", userPos);
+                intent.putExtra("Username", username);
+                intent.putExtra("UserStatus", isLoggedIn);
                 startActivity(intent);
             }
         });
@@ -137,5 +143,12 @@ public class FavoritePlaces extends AppCompatActivity {
                 return Double.compare(o2.getScore(), o1.getScore());
             }
         });
+    }
+
+    public boolean checkUserStatus() {
+        return getIntent().getBooleanExtra("UserStatus", false);
+    }
+    public String checkUsername() {
+        return getIntent().getStringExtra("Username");
     }
 }

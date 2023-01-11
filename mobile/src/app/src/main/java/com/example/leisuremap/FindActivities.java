@@ -38,13 +38,19 @@ public class FindActivities extends AppCompatActivity {
     private Button b_pref;
     List<Object> objects = new ArrayList<>();
 
+    LatLng userPos;
+    boolean isLoggedIn = false;
+    String username;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         getSupportActionBar().hide();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_find_activities);
 
-        LatLng userPos = getIntent().getParcelableExtra("Pos"); // getting user position
+        userPos = getIntent().getParcelableExtra("UserPos"); // getting user position
+        isLoggedIn = checkUserStatus();
+        username = checkUsername();
 
         //------------------------------------------------------SPINNERS----------------------------------------------------------------
         //distance spinner
@@ -82,7 +88,7 @@ public class FindActivities extends AppCompatActivity {
                 try {
                     //JSONArray array = response.getJSONArray("elements");
                     JSONArray array = response.getJSONArray("Table");
-                    for(int i = 0; i < array.length() - 1; i++) {
+                    for(int i = 0; i < array.length(); i++) {
                         JSONObject element = (JSONObject) array.get(i);
                         String latitude = element.get("lat").toString();
                         String longitude = element.get("lon").toString();
@@ -239,6 +245,9 @@ public class FindActivities extends AppCompatActivity {
             public void onClick(View view) {
                 Intent intent = new Intent(getBaseContext(), LeisureMap.class);
                 intent.putExtra("Position", pos);
+                intent.putExtra("UserPos", userPos);
+                intent.putExtra("Username", username);
+                intent.putExtra("UserStatus", isLoggedIn);
                 startActivity(intent);
             }
         });
@@ -251,5 +260,12 @@ public class FindActivities extends AppCompatActivity {
                 return Double.compare(o2.getScore(), o1.getScore());
             }
         });
+    }
+
+    public boolean checkUserStatus() {
+        return getIntent().getBooleanExtra("UserStatus", false);
+    }
+    public String checkUsername() {
+        return getIntent().getStringExtra("Username");
     }
 }

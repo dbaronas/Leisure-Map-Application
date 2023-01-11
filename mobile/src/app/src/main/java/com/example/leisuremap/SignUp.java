@@ -95,7 +95,6 @@ public class SignUp extends AppCompatActivity {
         else {
             HashPassword hashPassword = new HashPassword(pw);
             signUp(un, hashPassword.hashing());
-            System.out.println("sign up:  " + "username: " + un + " password: " + hashPassword.hashing());
         }
     }
 

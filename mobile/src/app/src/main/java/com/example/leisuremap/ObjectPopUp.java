@@ -28,6 +28,9 @@ public class ObjectPopUp extends AppCompatActivity {
     Button quickRouteButton, weatherButton, submitButton, favoriteButton;
     RatingBar ratingBar;
 
+    boolean isLoggedIn = false;
+    String username;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         //getSupportActionBar().hide();
@@ -44,55 +47,64 @@ public class ObjectPopUp extends AppCompatActivity {
 
         Intent intent = new Intent();
         String city = getIntent().getStringExtra("City");
-        int id = getIntent().getIntExtra("Id", 0);
+        String id = getIntent().getStringExtra("Id");
+        System.out.println(id);
+        isLoggedIn = checkUserStatus();
+        username = checkUsername();
 
         ratingBar = findViewById(R.id.rating);
         ratingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
             @Override
             public void onRatingChanged(RatingBar ratingBar, float rating, boolean fromUser) {
-                System.out.println(id);
                 if(rating<1.0f)
                     ratingBar.setRating(1.0f);
             }
         });
 
-        submitButton = findViewById(R.id.submitRating);
-        submitButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                float rating = ratingBar.getRating();
-                RequestQueue queue = Volley.newRequestQueue(ObjectPopUp.this);
-                String url = "http://193.219.91.103:16059/rateplace?id=" + id + "&rating=" + rating;
-                JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        try {
-                            String status = response.get("STATUS").toString();
-                            Toast.makeText(ObjectPopUp.this, status, Toast.LENGTH_SHORT).show();
-                            submitButton.setEnabled(false);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Toast.makeText(ObjectPopUp.this, "Connection problem", Toast.LENGTH_SHORT).show();
-                    }
-                });
-                request.setRetryPolicy(new DefaultRetryPolicy(60000, 1, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-                queue.add(request);
-            }
-        });
+        String username = getIntent().getStringExtra("Username");
 
-        quickRouteButton = findViewById(R.id.quickRouteW);
-        quickRouteButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View arg0) {
-                setResult(1, intent);
-                finish();
-            }
-        });
+        submitButton = findViewById(R.id.submitRating);
+        if(username == null)
+            submitButton.setEnabled(false);
+        else {
+            submitButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    float rating = ratingBar.getRating();
+                    RequestQueue queue = Volley.newRequestQueue(ObjectPopUp.this);
+                    System.out.println(id);
+                    String url = "http://193.219.91.103:16059/rateplace?id=" + id + "&rating=" + rating;
+                    JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+                        @Override
+                        public void onResponse(JSONObject response) {
+                            try {
+                                String status = response.get("STATUS").toString();
+                                Toast.makeText(ObjectPopUp.this, status, Toast.LENGTH_SHORT).show();
+                                submitButton.setEnabled(false);
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }, new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            Toast.makeText(ObjectPopUp.this, "Connection problem", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                    request.setRetryPolicy(new DefaultRetryPolicy(60000, 1, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+                    queue.add(request);
+                }
+            });
+
+            quickRouteButton = findViewById(R.id.quickRouteW);
+            quickRouteButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View arg0) {
+                    setResult(1, intent);
+                    finish();
+                }
+            });
+        }
 
         quickRouteButton = findViewById(R.id.quickRouteD);
         quickRouteButton.setOnClickListener(new View.OnClickListener() {
@@ -147,7 +159,6 @@ public class ObjectPopUp extends AppCompatActivity {
         });
 
         favoriteButton = findViewById(R.id.favorite);
-        String username = getIntent().getStringExtra("Username");
         if(username == null)
             favoriteButton.setEnabled(false);
         else {
@@ -162,7 +173,7 @@ public class ObjectPopUp extends AppCompatActivity {
                             try {
                                 String status = response.get("STATUS").toString();
                                 Toast.makeText(ObjectPopUp.this, status, Toast.LENGTH_SHORT).show();
-                                submitButton.setEnabled(false);
+                                favoriteButton.setEnabled(false);
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
@@ -178,5 +189,12 @@ public class ObjectPopUp extends AppCompatActivity {
                 }
             });
         }
+    }
+
+    public boolean checkUserStatus() {
+        return getIntent().getBooleanExtra("UserStatus", false);
+    }
+    public String checkUsername() {
+        return getIntent().getStringExtra("Username");
     }
 }

@@ -102,7 +102,6 @@ public class ChangePassword extends AppCompatActivity {
             HashPassword hashtCrPass = new HashPassword(crpass);
             HashPassword hashNewPass = new HashPassword(newpass);
             changePass(username, hashtCrPass.hashing(), hashNewPass.hashing());
-            System.out.println("Change pass: " + "username: " + username + " password: " + hashtCrPass.hashing() + " newpass " + hashNewPass.hashing());
         }
     }
 
