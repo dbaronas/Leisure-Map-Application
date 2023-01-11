@@ -179,29 +179,8 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
                         objectList.add(object);
 
                         String objNameDistance = objName + " | distance: " + String.format("%.3f", distance) + " km";
-
-                        Comparator<Object> comparator = new Comparator<Object>() {
-                            @Override
-                            public int compare(Object object, Object t1) {
-                                if (t1.getDistanceString() == null) {
-                                    return 1;
-                                }
-                                else if (object.getDistanceString() == null) {
-                                    return -1;
-                                }
-                                else if (object.getDistanceString() == null && t1.getDistanceString() == null) {
-                                    return 0;
-                                }
-                                return object.getDistanceString().compareTo(t1.getDistanceString());
-                            }
-                        };
-                        objectList.sort(comparator);
-                        //System.out.println("object distance: " + object.getDistanceString());
-                    }
-                    for (int i = 0; i<objectList.size(); i++){
-                        System.out.println(objectList.get(i).getName() + " " + objectList.get(i).getDistanceString());
-                        String objNameDistance = objectList.get(i).getName() + " | distance: " + objectList.get(i).getDistanceString();
                         arrayList.add(objNameDistance);
+                        //System.out.println("object distance: " + object.getDistanceString());
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();

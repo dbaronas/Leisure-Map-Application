@@ -39,12 +39,12 @@ public class FavoritePlaces extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         getSupportActionBar().hide();
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_find_activities);
+        setContentView(R.layout.activity_favorite_places);
 
         LatLng userPos = getIntent().getParcelableExtra("Pos");
 
         RequestQueue queue_objects = Volley.newRequestQueue(FavoritePlaces.this);
-        String url_objects = "http://193.219.91.103:16059/view?name=places";
+        String url_objects = "http://193.219.91.103:16059/view?name=place";
         JsonObjectRequest request_objects = new JsonObjectRequest(Request.Method.GET, url_objects, null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {

@@ -94,6 +94,7 @@ public class MainMenu extends AppCompatActivity {
             }
         });
 
+        b_favorite_places = findViewById(R.id.favoritePlaces);
         b_favorite_places.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -107,7 +108,7 @@ public class MainMenu extends AppCompatActivity {
         });
 
         b_sign_in = findViewById(R.id.signIn);
-        b_favorite_places = findViewById(R.id.favoritePlaces);
+        b_sign_in.setOnClickListener(view -> openLogin());
         b_logOut = findViewById(R.id.logOut);
 
         b_logOut.setOnClickListener(new View.OnClickListener() {
