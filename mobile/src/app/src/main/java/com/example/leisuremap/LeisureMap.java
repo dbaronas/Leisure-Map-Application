@@ -67,6 +67,9 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
     List<Marker> objectMarkers = new ArrayList<>();
     Marker currentMarker = null;
 
+    boolean isLoggedIn = false;
+    String username;
+
     LatLng userPos;
 
     Marker userPolyMarker;
@@ -100,7 +103,9 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
         mapGps = (ImageView) findViewById(R.id.ic_gps);
         mapGps.setVisibility(View.VISIBLE);
 
-        userPos = getIntent().getParcelableExtra("Pos");
+        userPos = getIntent().getParcelableExtra("UserPos");
+        isLoggedIn = checkUserStatus();
+        username = checkUsername();
     }
 
     private void pointToPosition(LatLng position) {
@@ -145,7 +150,7 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
                     JSONArray array = response.getJSONArray("Table");
                     for(int i = 0; i < array.length(); i++) {
                         JSONObject element = (JSONObject) array.get(i);
-                        int objId = element.getInt("id");
+                        String objId = element.get("id").toString();
                         String objName = element.get("name").toString();
                         String latitude = element.get("lat").toString();
                         String longitude = element.get("lon").toString();
@@ -287,8 +292,10 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
                     for(Object o : objectList) {
                         if(title.equals(o.getName())) {
                             System.out.println(title + "    " + o.getName() + "    " + o.getCity());
+                            intentObject.putExtra("Username", username);
+                            intentObject.putExtra("UserStatus", isLoggedIn);
                             intentObject.putExtra("City", o.getCity());
-                            intentObject.putExtra("Id", o.getLon());
+                            intentObject.putExtra("Id", o.getId());
                         }
                     }
                     startActivityForResult(intentObject, 0);
@@ -516,6 +523,7 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
     }
 
     private void direction(LatLng userPos, String type) {
+        System.out.println(userPos);
         String s1 = currentMarker.getPosition().latitude + ", " + currentMarker.getPosition().longitude;
         String s2 = userPos.latitude + ", " + userPos.longitude;
         RequestQueue requestQueue = Volley.newRequestQueue(this);
@@ -622,5 +630,12 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
             direction(userPos, "walking");
         else if(resultCode==2)
             direction(userPos, "driving");
+    }
+
+    public boolean checkUserStatus() {
+        return getIntent().getBooleanExtra("UserStatus", false);
+    }
+    public String checkUsername() {
+        return getIntent().getStringExtra("Username");
     }
 }

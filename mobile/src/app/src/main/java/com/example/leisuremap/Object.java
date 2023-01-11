@@ -1,9 +1,8 @@
 package com.example.leisuremap;
 
 public class Object {
-    private int id;
+    private String id;
     private String name;
-    //<E extends Comparable <E>>
     private double distance;
     private double lat;
     private double lon;
@@ -24,7 +23,7 @@ public class Object {
         this.score = score;
     }
 
-    public Object(String name, double lat, double lon, String type, String distanceString, String city, int id) {
+    public Object(String name, double lat, double lon, String type, String distanceString, String city, String id) {
         this.id = id;
         this.name = name;
         this.lat = lat;
@@ -34,11 +33,20 @@ public class Object {
         this.city = city;
     }
 
-    public int getId() {
+    public Object(String name, double distance, String city, String type, double lat, double lon) {
+        this.lat = lat;
+        this.lon = lon;
+        this.name = name;
+        this.type = type;
+        this.distance = distance;
+        this.city = city;
+    }
+
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 

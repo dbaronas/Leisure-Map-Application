@@ -166,7 +166,6 @@ public class Login extends AppCompatActivity {
             guideText.setText("Please enter password");
         else {
             logIn(un, pw);
-            System.out.println("Login: " + "username: " + un + " password: " + pw);
         }
     }
 

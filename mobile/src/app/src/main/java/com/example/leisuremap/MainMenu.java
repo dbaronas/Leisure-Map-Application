@@ -50,6 +50,7 @@ public class MainMenu extends AppCompatActivity {
     private LocationRequest locationRequest;
     private LatLng pos;
     boolean isLoggedIn = false;
+    String username;
     public static Activity fa;
     int i; //activity type
 
@@ -119,6 +120,8 @@ public class MainMenu extends AppCompatActivity {
         });
 
         isLoggedIn = checkUserStatus();
+        username = checkUsername();
+
         if (!isLoggedIn) {
             b_activities.setEnabled(false);
             b_logOut.setEnabled(false);
@@ -128,9 +131,8 @@ public class MainMenu extends AppCompatActivity {
             b_sign_in.setEnabled(false);
         }
 
-        if (isOnline() == true) {
+        if (isOnline() == true) { }
 
-        }
         else {
             try {
                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(MainMenu.this);
@@ -157,6 +159,7 @@ public class MainMenu extends AppCompatActivity {
                 System.out.println("Show Dialog: " + e.getMessage());
             }
         }
+
 
     }
 
@@ -277,13 +280,17 @@ public class MainMenu extends AppCompatActivity {
 
     public void openActivities() {
         Intent intent = new Intent(this, FindActivities.class);
-        intent.putExtra("Pos", pos);
+        intent.putExtra("UserPos", pos);
+        intent.putExtra("UserStatus", isLoggedIn);
+        intent.putExtra("Username", username);
         startActivity(intent);
     }
 
     public void openLeisureMap() {
         Intent intent = new Intent(this, LeisureMap.class);
-        intent.putExtra("Pos", pos);
+        intent.putExtra("UserPos", pos);
+        intent.putExtra("UserStatus", isLoggedIn);
+        intent.putExtra("Username", username);
         startActivity(intent);
     }
 
@@ -294,11 +301,17 @@ public class MainMenu extends AppCompatActivity {
 
     public void openFavoritePlaces() {
         Intent intent = new Intent(this, FavoritePlaces.class);
+        intent.putExtra("UserPos", pos);
+        intent.putExtra("UserStatus", isLoggedIn);
+        intent.putExtra("Username", username);
         startActivity(intent);
     }
 
     public boolean checkUserStatus() {
         return getIntent().getBooleanExtra("UserStatus", false);
+    }
+    public String checkUsername() {
+        return getIntent().getStringExtra("Username");
     }
 
     public void waitForPosition() {
@@ -332,7 +345,6 @@ public class MainMenu extends AppCompatActivity {
         if(n==1){ // App is killed
             return false;
         }
-
         return true; // App is in background or foreground
     }
 
@@ -349,7 +361,5 @@ public class MainMenu extends AppCompatActivity {
             //System.out.println("endTime: " + formatter.format(endTime));
             //intent.putExtra("EndTime", formatter.format(endTime));
         }
-
     }
-
 }
