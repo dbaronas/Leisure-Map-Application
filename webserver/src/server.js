@@ -40,6 +40,8 @@ app.get('/weather', application.api.getWeather)
 app.get('/table', application.db.getTable)
 app.get('/view', application.db.getView)
 app.get('/saveplace', application.db.savePlace)
+app.get('/getFavourite', application.db.getFavPlace)
+app.get('/deleteplace', application.db.deletePlace)
 app.get('/rateplace', application.db.ratePlace)
 //app.post('/session', application.db.searchSession)
 

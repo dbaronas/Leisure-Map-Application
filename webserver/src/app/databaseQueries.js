@@ -44,11 +44,10 @@ const savePlace = (req, res) => {
   const username = data.toLowerCase()
   const id = req.query.id
 
-  pool.query(`SELECT 1 FROM favourite_places WHERE username='${username}' AND place_id=${id}`, (error, results) => {
-    if(results.rows[0] == 1){
+  pool.query(`SELECT 1 as exists FROM favourite_places WHERE username='${username}' AND place_id=${id}`, (error, results) => {
+    if(results.rows[0].exists == 1){
       const STATUS = {
-        STATUS: ERR,
-        message: 'Place is already saved!'
+        STATUS: 'Place is already saved!'
       }
       res.json({STATUS})
     }
@@ -58,8 +57,33 @@ const savePlace = (req, res) => {
           throw error
         }
         const STATUS = {
-          STATUS: DONE,
-          message: `Place saved successfully!`
+          STATUS: 'Place saved successfully!'
+        }
+        res.json({STATUS})
+      })
+    }
+  })
+}
+
+const deletePlace = (req, res) => {
+  const data = req.query.username
+  const username = data.toLowerCase()
+  const id = req.query.id
+
+  pool.query(`SELECT 1 as exists FROM favourite_places WHERE username='${username}' AND place_id=${id}`, (error, results) => {
+    if(results.rows[0].exists == 0){
+      const STATUS = {
+        STATUS: 'Place is not saved!'
+      }
+      res.json({STATUS})
+    }
+    else{
+      pool.query(`DELETE FROM favourite_places (username, place_id) VALUES ($1, $2)`, [username, id], (error) => {
+        if(error){
+          throw error
+        }
+        const STATUS = {
+          STATUS: 'Place deleted successfully!'
         }
         res.json({STATUS})
       })
@@ -132,6 +156,7 @@ module.exports = {
   getView,
   savePlace,
   ratePlace,
-  getFavPlace
+  getFavPlace,
+  deletePlace,
   //searchSession
 }

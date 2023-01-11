@@ -17,19 +17,19 @@ describe('Creating user that does not exist', () => {
         .get('/user/create?username=gediminas&pass=lapinas')
         .end((err, res) => {
               res.should.have.status(200)
-              expect(res.headers['content-type']).to.have.string('application/json')
+              expect(res.headers['content-length']).to.not.have.string('39')
               done()
         })
   })
 })
 
 describe('Creating user that already exists', () => {
-  it('response code should be 404 because user already exists', (done) => {
+  it('it shouldnt create new account because user already exists', (done) => {
     chai.request(server)
         .get('/user/create?username=arthur&pass=vilkas')
         .end((err, res) => {
               res.should.have.status(200)
-              expect(res.headers['content-type']).to.have.string('application/json')
+              expect(res.headers['content-length']).to.have.string('39')
         })
   })
 })

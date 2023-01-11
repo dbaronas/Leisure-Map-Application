@@ -1,5 +1,5 @@
 const pool = require('./database')
-const bcrypt = require('bcrypt')
+const bcrypt = require('bcryptjs')
 
 const login = (req, res) => {
     const data = req.query.username
