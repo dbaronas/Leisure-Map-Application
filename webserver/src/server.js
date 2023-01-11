@@ -27,9 +27,6 @@ app.get('/update/overpassapi/restaurants', application.overpass.updateRestaurant
 //Testing
 app.get('/test/connections', test.connections.testConnections)
 
-
-app.get('/score', application.score.getScore)
-
 //Get any location from Overpass API
 app.get('/locations', application.api.getLocations)
 

@@ -5,7 +5,7 @@ const pool = require('./database')
 
 const options = {
 
-max: 500,
+max: 368,
 maxSize: 5000,
 sizeCalculation: (value, key) => {
   return 1

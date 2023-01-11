@@ -6,7 +6,7 @@ const incTag = (req, res) => {
     const username = data.toLowerCase()
     const id = req.query.id
 
-    pool.query(`UPDATE searched_tags set count= total + 1 WHERE username='${username}' AND tag_id=id`), (error, results) => {
+    pool.query(`UPDATE searched_tags set count= total + 1 WHERE username='${username}' AND tag_id=${id}`), (error, results) => {
         if(error){
             throw error
         }
@@ -29,7 +29,6 @@ const getRecommendation = (req, res) => {
     }
     let places = []
     let arrlength = -1
-    let sessions
     let max = -2
     pool.query(`SELECT * FROM getTags WHERE username='${username}'`, (error, results) => {
         if(error){
@@ -53,7 +52,7 @@ const getRecommendation = (req, res) => {
                         mostSimilar.coefficient = correlation
                     }
             }
-            pool.query(`SELECT * FROM sessions WHERE username='${mostSimilar.user}'`, async (error, results) => {
+            pool.query(`SELECT * FROM week_sessions WHERE username='${mostSimilar.user}'`, async (error, results) => {
             await new Promise(async(resolve, reject) => {
                 for(let i = 0; i < results.rows.length; i++){
                     await new Promise((resolve, reject) => {

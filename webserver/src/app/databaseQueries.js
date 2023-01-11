@@ -1,5 +1,6 @@
 const pool = require('./database')
 const math = require('exact-math')
+
 const getTable = (req, res) => {
   const name = req.query.name
   pool.query(`SELECT EXISTS (SELECT FROM pg_tables WHERE schemaname = 'public' AND tablename = '${name}')`, (error, results) => {
@@ -39,17 +40,51 @@ const getView = (req, res) => {
 }
 
 const savePlace = (req, res) => {
-  const username = req.query.username
+  const data = req.query.username
+  const username = data.toLowerCase()
   const id = req.query.id
 
-  pool.query(`INSERT INTO favourite_places (username, place_id) VALUES ($1, $2)`, [username, id], (error, results) => {
-    if(error){
-      throw error
+  pool.query(`SELECT 1 FROM favourite_places WHERE username='${username}' AND place_id=${id}`, (error, results) => {
+    if(results.rows[0] == 1){
+      const STATUS = {
+        STATUS: ERR,
+        message: 'Place is already saved!'
+      }
+      res.json({STATUS})
     }
-    const STATUS = {
-      STATUS: `Place saved successfully!`
+    else{
+      pool.query(`INSERT INTO favourite_places (username, place_id) VALUES ($1, $2)`, [username, id], (error) => {
+        if(error){
+          throw error
+        }
+        const STATUS = {
+          STATUS: DONE,
+          message: `Place saved successfully!`
+        }
+        res.json({STATUS})
+      })
     }
-    res.send({STATUS})
+  })
+}
+
+const getFavPlace = (req, res) => {
+  const data = req.query.username
+  const username = data.toLowerCase()
+  const favPlaces = []
+
+  pool.query(`SELECT * FROM favourite_places WHERE username='${username}'`, async (error, results) => {
+    await new Promise(async (resolve, reject) => {
+      for(let i = 0; i < results.rows.length; i++) {
+        await new Promise((resolve, reject) => {
+          pool.query(`SELECT * FROM place WHERE id=${results.rows[i].place_id}`, (error, results2) => {
+            favPlaces[i] = results2.rows[0]
+          })
+          resolve()
+        })
+      }
+      resolve()
+    })
+    res.json({Places: favPlaces})
   })
 }
 
@@ -69,7 +104,7 @@ const ratePlace = (req, res) => {
         throw error
       }
       const STATUS = `Thank you fro your feedback!`
-      res.send({STATUS})
+      res.json({STATUS})
     })
   })
   
@@ -96,6 +131,7 @@ module.exports = {
   getTable,
   getView,
   savePlace,
-  ratePlace
+  ratePlace,
+  getFavPlace
   //searchSession
 }
