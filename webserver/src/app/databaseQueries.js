@@ -4,6 +4,9 @@ const math = require('exact-math')
 const getTable = (req, res) => {
   const name = req.query.name
   pool.query(`SELECT EXISTS (SELECT FROM pg_tables WHERE schemaname = 'public' AND tablename = '${name}')`, (error, results) => {
+    if(error){
+      throw error
+    }
     if(results.rows[0].exists == false){
       res.json({ERROR: `Table ${name} does not exist`})
     }
@@ -23,6 +26,9 @@ const getTable = (req, res) => {
 const getView = (req, res) => {
   const name = req.query.name
   pool.query(`SELECT EXISTS (SELECT FROM pg_views WHERE schemaname = 'public' AND viewname = '${name}')`, (error, results) => {
+    if(error){
+      throw error
+    }
     if(results.rows[0].exists == false){
       res.json({ERROR: `View ${name} does not exist`})
     }
@@ -44,11 +50,12 @@ const savePlace = (req, res) => {
   const username = data.toLowerCase()
   const id = req.query.id
 
-  pool.query(`SELECT 1 as exists FROM favourite_places WHERE username='${username}' AND place_id=${id}`, (error, results) => {
+  pool.query(`SELECT EXISTS (SELECT 1 as exists FROM favourite_places WHERE username='${username}' AND place_id=${id})`, (error, results) => {
+    if(error){
+      throw error
+    }
     if(results.rows[0].exists == 1){
-      const STATUS = {
-        STATUS: 'Place is already saved!'
-      }
+      const STATUS = 'Place is already saved!'
       res.json({STATUS})
     }
     else{
@@ -56,9 +63,7 @@ const savePlace = (req, res) => {
         if(error){
           throw error
         }
-        const STATUS = {
-          STATUS: 'Place saved successfully!'
-        }
+        const STATUS = 'Place saved successfully!'
         res.json({STATUS})
       })
     }
@@ -71,10 +76,11 @@ const deletePlace = (req, res) => {
   const id = req.query.id
 
   pool.query(`SELECT 1 as exists FROM favourite_places WHERE username='${username}' AND place_id=${id}`, (error, results) => {
+    if(error){
+      throw error
+    }
     if(results.rows[0].exists == 0){
-      const STATUS = {
-        STATUS: 'Place is not saved!'
-      }
+      const STATUS = 'Place is not saved!'
       res.json({STATUS})
     }
     else{
@@ -82,9 +88,7 @@ const deletePlace = (req, res) => {
         if(error){
           throw error
         }
-        const STATUS = {
-          STATUS: 'Place deleted successfully!'
-        }
+        const STATUS = 'Place deleted successfully!'
         res.json({STATUS})
       })
     }
@@ -97,13 +101,19 @@ const getFavPlace = (req, res) => {
   const favPlaces = []
 
   pool.query(`SELECT * FROM favourite_places WHERE username='${username}'`, async (error, results) => {
+    if(error){
+      throw error
+    }
     await new Promise(async (resolve, reject) => {
       for(let i = 0; i < results.rows.length; i++) {
         await new Promise((resolve, reject) => {
           pool.query(`SELECT * FROM place WHERE id=${results.rows[i].place_id}`, (error, results2) => {
+            if(error){
+              throw error
+            }
             favPlaces[i] = results2.rows[0]
+            resolve()
           })
-          resolve()
         })
       }
       resolve()
@@ -134,22 +144,43 @@ const ratePlace = (req, res) => {
   
 }
 
-/*const searchSession = (req, res) => {
+const searchSession = async (req, res) => {
   const username = req.body.username
   const start = req.body.start
   const end = req.body.end
   const places = req.body.places
 
-  pool.query(`INSERT INTO sessions (username, start_time, end_time) VALUES ($1, $2, $3)`, [username, start, end], (error, results) => {
+  await new Promise((resolve, reject) => {
+    pool.query(`INSERT INTO sessions (username, start_time, end_time) VALUES ($1, $2, $3)`, [username, start, end], (error, results) => {
+      if(error){
+        throw error
+      }
+      resolve()
+    })
+  })
+  pool.query(`SELECT * FROM sessions WHERE username='${username}'`, async (error, results) => {
     if(error){
       throw error
     }
+    const lastId = results.rows[results.rows.length - 1].session_id
+    const date = results.rows[results.rows.length - 1].date
+    await new Promise(async (resolve, reject) => {
+      for(let i = 0; i < places.length; i++){
+        await new Promise((resolve, reject) => {
+          pool.query(`INSERT INTO searched_places (session_id, place_id) VALUES ($1, $2, $3)`, [lastId, places[i].id, date], (error, results) => {
+            if(error){
+              throw error
+            }
+            resolve()
+          })
+        })
+      }
+      resolve()
+    })
+    res.json({STATUS: 'Done'})
   })
-  pool.query(`SELECT session_id FROM sessions WHERE username='${username}' ORDER BY session_id DESC `)
-  for(let i = 0; i < places.lenght; i++){
-    pool.query(`INSERT INTO`)
-  }
-}*/
+
+}
 
 module.exports = {
   getTable,
@@ -158,5 +189,5 @@ module.exports = {
   ratePlace,
   getFavPlace,
   deletePlace,
-  //searchSession
+  searchSession
 }
