@@ -7,11 +7,16 @@ import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -22,6 +27,7 @@ import android.widget.Toast;
 
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
+import com.google.android.gms.common.internal.Constants;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
@@ -32,6 +38,11 @@ import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
 
 public class MainMenu extends AppCompatActivity {
 
@@ -99,6 +110,12 @@ public class MainMenu extends AppCompatActivity {
         b_favorite_places = findViewById(R.id.favoritePlaces);
         b_logOut = findViewById(R.id.logOut);
 
+        b_logOut.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                logOut();
+            }
+        });
 
         isLoggedIn = checkUserStatus();
         if (!isLoggedIn) {
@@ -109,24 +126,49 @@ public class MainMenu extends AppCompatActivity {
         else {
             b_sign_in.setEnabled(false);
         }
+
+        if (isOnline() == true) {
+
+        }
+        else {
+            try {
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(MainMenu.this);
+                alertDialogBuilder.setTitle("Error")
+                        .setMessage("Network connection is unavailable, double check your connectivity and try again.")
+                        .setCancelable(false)
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .setPositiveButton(" Enable Connection ", new DialogInterface.OnClickListener(){
+                            public void onClick(DialogInterface dialog, int id){
+                                Intent dialogIntent = new Intent(android.provider.Settings.ACTION_WIFI_SETTINGS);
+                                dialogIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                MainMenu.this.startActivity(dialogIntent);
+                            }
+                        });
+
+                alertDialogBuilder.setNegativeButton(" OK ", new DialogInterface.OnClickListener(){
+                    public void onClick(DialogInterface dialog, int id){
+                        dialog.cancel();
+                    }
+                });
+                AlertDialog alert = alertDialogBuilder.create();
+                alert.show();
+            } catch (Exception e) {
+                System.out.println("Show Dialog: " + e.getMessage());
+            }
+        }
+
     }
 
-//    protected void onStart() {
-//        super.onStart();
-//
-//        //check if a user is logged in, if - yes, then move him to MainMenu
-//        SessionManagement sessionManagement = new SessionManagement(MainMenu.this);
-//        String un = sessionManagement.getSessionUsername();
-//        String pw = sessionManagement.getSessionPassword();
-//
-//        if (un != null && pw != null ) {
-//            Login login = new Login();
-//            login.moveToMainMenu();
-//        }
-//        else {
-//
-//        }
-//    }
+    public boolean isOnline() {
+        ConnectivityManager conMgr = (ConnectivityManager) getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = conMgr.getActiveNetworkInfo();
+
+        if(netInfo == null || !netInfo.isConnected() || !netInfo.isAvailable()){
+            Toast.makeText(MainMenu.this, "No Internet connection!", Toast.LENGTH_LONG).show();
+            return false;
+        }
+        return true;
+    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -277,13 +319,36 @@ public class MainMenu extends AppCompatActivity {
         }, 1000);
     }
 
-    public void logOut(View view) {
+    public boolean isRunning() {
+        ActivityManager m = (ActivityManager) this.getSystemService( ACTIVITY_SERVICE );
+        List<ActivityManager.RunningTaskInfo> runningTaskInfoList =  m.getRunningTasks(10);
+        Iterator<ActivityManager.RunningTaskInfo> itr = runningTaskInfoList.iterator();
+        int n=0;
+        while(itr.hasNext()){
+            n++;
+            itr.next();
+        }
+        if(n==1){ // App is killed
+            return false;
+        }
+
+        return true; // App is in background or foreground
+    }
+
+    public void logOut() {
         SessionManagement sessionManagement = new SessionManagement(MainMenu.this);
         sessionManagement.removeSession();
-
         Intent intent = new Intent(MainMenu.this, MainMenu.class);
         //any existing task that are associated with the activity are cleared before the activity is started
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
+        if (isRunning() == false) {
+            SimpleDateFormat formatter= new SimpleDateFormat("HH:mm");
+            Date endTime = new Date(System.currentTimeMillis());
+            //System.out.println("endTime: " + formatter.format(endTime));
+            //intent.putExtra("EndTime", formatter.format(endTime));
+        }
+
     }
+
 }

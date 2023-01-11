@@ -46,11 +46,26 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/username" />
 
+    <CheckBox
+        android:id="@+id/passwordCheckbox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="46dp"
+        android:gravity="center_vertical|left"
+        android:text="Show Password"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.15"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/password" />
+
     <EditText
         android:id="@+id/inputUsername"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:ems="15"
+        android:maxLength="17"
+        android:digits="AĄBCČDEĘĖFGHIĮJKLMNOPQRSŠTUŲŪVWXYZŽaąbcčdeęėfghiįjklmnopqrsštuųūvwxyzž1234567890!@#$%^*()>_*/-+.|\?{}:;"
         app:layout_constraintStart_toStartOf="@+id/username"
         app:layout_constraintTop_toBottomOf="@+id/username" />
 
@@ -59,6 +74,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:ems="15"
+        android:maxLength="17"
+        android:inputType="textPassword"
+        android:digits="AĄBCČDEĘĖFGHIĮJKLMNOPQRSŠTUŲŪVWXYZŽaąbcčdeęėfghiįjklmnopqrsštuųūvwxyzž1234567890!@#$%^*()>_*/-+.|\?{}:;"
         app:layout_constraintStart_toStartOf="@+id/password"
         app:layout_constraintTop_toBottomOf="@+id/password" />
 
@@ -66,7 +84,7 @@
         android:id="@+id/changePass"
         android:layout_width="170dp"
         android:layout_height="32dp"
-        android:layout_marginTop="4dp"
+        android:layout_marginTop="10dp"
         android:background="@android:color/transparent"
         android:text="@string/change_password"
         android:textColor="#808080"
@@ -74,13 +92,13 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/guide" />
+        app:layout_constraintTop_toBottomOf="@+id/passwordCheckbox" />
 
     <Button
         android:id="@+id/signUp"
         android:layout_width="170dp"
         android:layout_height="32dp"
-        android:layout_marginTop="0dp"
+        android:layout_marginTop="15dp"
         android:background="@android:color/transparent"
         android:text="Create an account"
         android:textColor="#808080"
@@ -94,7 +112,7 @@
         android:id="@+id/signIn"
         android:layout_width="170dp"
         android:layout_height="50dp"
-        android:layout_marginTop="5dp"
+        android:layout_marginTop="20dp"
         android:text="@string/sign_in"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
@@ -105,7 +123,7 @@
         android:id="@+id/guide"
         android:layout_width="340dp"
         android:layout_height="30dp"
-        android:layout_marginTop="5dp"
+        android:layout_marginTop="-5dp"
         android:gravity="center_vertical|center_horizontal"
         android:text=""
         android:textSize="14sp"

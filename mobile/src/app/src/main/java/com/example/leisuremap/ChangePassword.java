@@ -4,7 +4,11 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.method.HideReturnsTransformationMethod;
+import android.text.method.PasswordTransformationMethod;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -37,6 +41,7 @@ public class ChangePassword extends AppCompatActivity {
     EditText username_input, current_pass, new_pass, new_pass2;
     TextView guideText;
     boolean passChanged = false;
+    private CheckBox passwordCheckbox;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +55,25 @@ public class ChangePassword extends AppCompatActivity {
         new_pass = findViewById(R.id.inputNewPass);
         new_pass2 = findViewById(R.id.inputNewPass2);
         b_send = findViewById(R.id.changePass);
+        passwordCheckbox = findViewById(R.id.passwordCheckbox);
+
+        passwordCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
+                if (isChecked) {
+                    // To hide password
+                    current_pass.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
+                    new_pass.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
+                    new_pass2.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
+                } else {
+                    // To show password
+                    current_pass.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                    new_pass.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                    new_pass2.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                }
+            }
+        });
+
         b_send.setOnClickListener(view -> {
             try {
                 printInfo();
@@ -75,10 +99,10 @@ public class ChangePassword extends AppCompatActivity {
         else if (!newpass.matches(newpass2))
             guideText.setText("Entered passwords do not match");
         else {
-            EncryptPass encryptCrPass = new EncryptPass(crpass);
-            EncryptPass encryptNewPass = new EncryptPass(newpass);
-            changePass(username, encryptCrPass.encryption(), encryptNewPass.encryption());
-            System.out.println("Change pass: " + "username: " + username + " password: " + encryptCrPass.encryption() + " newpass " + encryptNewPass.encryption());
+            HashPassword hashtCrPass = new HashPassword(crpass);
+            HashPassword hashNewPass = new HashPassword(newpass);
+            changePass(username, hashtCrPass.hashing(), hashNewPass.hashing());
+            System.out.println("Change pass: " + "username: " + username + " password: " + hashtCrPass.hashing() + " newpass " + hashNewPass.hashing());
         }
     }
 
@@ -90,9 +114,11 @@ public class ChangePassword extends AppCompatActivity {
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
+                String message = "";
                 try {
                     JSONObject status = response.getJSONObject("STATUS");
                     passChanged = (boolean) status.get("UPDATE");
+                    message = (String) status.get("message");
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -104,7 +130,7 @@ public class ChangePassword extends AppCompatActivity {
                     finish();
                 }
                 else
-                    guideText.setText("Could not change password");
+                    guideText.setText(message);
             }
         }, new Response.ErrorListener() {
             @Override

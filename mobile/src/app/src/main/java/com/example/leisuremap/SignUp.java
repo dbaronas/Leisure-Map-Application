@@ -4,7 +4,11 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.method.HideReturnsTransformationMethod;
+import android.text.method.PasswordTransformationMethod;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -37,6 +41,7 @@ public class SignUp extends AppCompatActivity {
     EditText username, password, password2;
     TextView guideText;
     boolean accCreated = false;
+    private CheckBox passwordCheckbox;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +62,22 @@ public class SignUp extends AppCompatActivity {
         username = findViewById(R.id.inputUsername);
         password = findViewById(R.id.inputPassword);
         password2 = findViewById(R.id.inputPassword2);
+        passwordCheckbox = findViewById(R.id.passwordCheckbox);
+
+        passwordCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
+                if (isChecked) {
+                    // To hide password
+                    password.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
+                    password2.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
+                } else {
+                    // To show password
+                    password.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                    password2.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                }
+            }
+        });
     }
 
     public void printInfo() throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
@@ -72,9 +93,9 @@ public class SignUp extends AppCompatActivity {
         else if(!pw.matches(pw2))
             guideText.setText("Passwords do not match");
         else {
-            EncryptPass encryptPass = new EncryptPass(pw);
-            signUp(un, encryptPass.encryption());
-            System.out.println("sign up:  " + "username: " + un + " password: " + encryptPass.encryption());
+            HashPassword hashPassword = new HashPassword(pw);
+            signUp(un, hashPassword.hashing());
+            System.out.println("sign up:  " + "username: " + un + " password: " + hashPassword.hashing());
         }
     }
 
@@ -88,9 +109,11 @@ public class SignUp extends AppCompatActivity {
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
+                String message = "";
                 try {
                     JSONObject status = response.getJSONObject("STATUS");
                     accCreated = (boolean) status.get("SIGNUP");
+                    message = (String) status.get("message");
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -104,7 +127,7 @@ public class SignUp extends AppCompatActivity {
                     finish();
                 }
                 else
-                    guideText.setText("Could not create account");
+                    guideText.setText(message);
             }
         }, new Response.ErrorListener() {
             @Override
