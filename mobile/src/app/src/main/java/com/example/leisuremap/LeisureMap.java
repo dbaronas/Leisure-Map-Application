@@ -2,6 +2,7 @@ package com.example.leisuremap;
 
 import android.content.Intent;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
@@ -9,6 +10,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.Toast;
@@ -29,6 +31,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MapStyleOptions;
@@ -41,6 +44,8 @@ import org.json.JSONObject;
 
 import java.text.Normalizer;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
@@ -56,6 +61,7 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
     List<Object> objectList = new ArrayList<>();
     List<Marker> objectMarkers = new ArrayList<>();
     Marker currentMarker = null;
+    ImageView mapGps;
 
     ArrayList<String> arrayList = new ArrayList<>();
     ArrayAdapter<String> adapter;
@@ -77,9 +83,11 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
 
         listView = findViewById(R.id.list_view);
         adapter = new ArrayAdapter<String>(LeisureMap.this,
-                android.R.layout.simple_list_item_1, arrayList);
+                R.layout.list_item, R.id.text_view, arrayList);
         listView.setAdapter(adapter);
         listView.setVisibility(View.GONE);
+        mapGps = (ImageView) findViewById(R.id.ic_gps);
+        mapGps.setVisibility(View.VISIBLE);
 
     }
 
@@ -111,10 +119,11 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
             Log.e(TAG, "Can't find style. Error: ", e);
         }
 
+
         LatLng userPos = getIntent().getParcelableExtra("Pos"); // getting user's position
         RequestQueue queue_objects = Volley.newRequestQueue(LeisureMap.this);
         //String url_objects = "https://overpass-api.de/api/interpreter?data=%2F*%0AThis%20has%20been%20generated%20by%20the%20overpass-turbo%20wizard.%0AThe%20original%20search%20was%3A%0A%E2%80%9Ctourism%3Dmuseum%20in%20lithuania%E2%80%9D%0A*%2F%0A%5Bout%3Ajson%5D%5Btimeout%3A25%5D%3B%0A%2F%2F%20fetch%20area%20%E2%80%9Clithuania%E2%80%9D%20to%20search%20in%0Aarea%28id%3A3600072596%29-%3E.searchArea%3B%0A%2F%2F%20gather%20results%0A%28%0A%20%20%2F%2F%20query%20part%20for%3A%20%E2%80%9Ctourism%3Dmuseum%E2%80%9D%0A%20%20node%5B%22tourism%22%3D%22museum%22%5D%28area.searchArea%29%3B%0A%20%20way%5B%22tourism%22%3D%22museum%22%5D%28area.searchArea%29%3B%0A%20%20relation%5B%22tourism%22%3D%22museum%22%5D%28area.searchArea%29%3B%0A%29%3B%0A%2F%2F%20print%20results%0Aout%20body%3B%0A%3E%3B%0Aout%20skel%20qt%3B";
-        String url_objects = "http://193.219.91.104:1254/table?name=place";
+        String url_objects = "http://193.219.91.103:16059/table?name=place";
         JsonObjectRequest request_objects = new JsonObjectRequest(Request.Method.GET, url_objects, null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
@@ -153,9 +162,27 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
                         double distance=startPoint.distanceTo(endPoint) / 1000;
                         Object object = new Object(objName, lat, lon, objType, String.format("%.3f", distance));
                         objectList.add(object);
-                        System.out.println("object distance: " + object.getDistanceString());
-
-                        String objNameDistance = objName + " | distance: " + String.format("%.3f", distance) + " km";
+                        Comparator<Object> comparator = new Comparator<Object>() {
+                            @Override
+                            public int compare(Object object, Object t1) {
+                                if (t1.getDistanceString() == null) {
+                                    return 1;
+                                }
+                                else if (object.getDistanceString() == null) {
+                                    return -1;
+                                }
+                                else if (object.getDistanceString() == null && t1.getDistanceString() == null) {
+                                    return 0;
+                                }
+                                return object.getDistanceString().compareTo(t1.getDistanceString());
+                            }
+                        };
+                        objectList.sort(comparator);
+                        //System.out.println("object distance: " + object.getDistanceString());
+                    }
+                    for (int i = 0; i<objectList.size(); i++){
+                        System.out.println(objectList.get(i).getName() + " " + objectList.get(i).getDistanceString());
+                        String objNameDistance = objectList.get(i).getName() + " | distance: " + objectList.get(i).getDistanceString();
                         arrayList.add(objNameDistance);
                     }
                 } catch (JSONException e) {
@@ -173,7 +200,7 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
 
         RequestQueue queue_cities = Volley.newRequestQueue(LeisureMap.this);
         //String url_cities = "https://overpass-api.de/api/interpreter?data=[out:json][timeout:25];area(id:3600072596)-%3E.searchArea;(node[%22place%22=%22city%22](area.searchArea);way[%22place%22=%22city%22](area.searchArea);relation[%22place%22=%22city%22](area.searchArea););out%20body;%3E;out%20skel%20qt;";
-        String url_cities = "http://193.219.91.104:1254/table?name=city";
+        String url_cities = "http://193.219.91.103:16059/table?name=city";
         JsonObjectRequest request_cities = new JsonObjectRequest(Request.Method.GET, url_cities, null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
@@ -221,6 +248,11 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
                             arrayList.add(cityNameDistance);
                         }
                     }
+                    for (int i = 0; i<objectList.size(); i++){
+                        System.out.println(objectList.get(i).getName() + " " + String.format("%.3f", objectList.get(i).getDistance()));
+                        String objNameDistance = objectList.get(i).getName() + " | distance: " + String.format("%.3f", objectList.get(i).getDistance());
+                        arrayList.add(objNameDistance);
+                    }
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -266,6 +298,24 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
             }
         });
 
+        mapGps.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (userPos != null) {
+                    CircleOptions gps = new CircleOptions();
+                    gps.center(userPos);
+                    gps.radius(4);
+                    gps.fillColor(0x8800CCFF);
+                    gps.strokeColor(Color.BLUE);
+                    gps.strokeWidth(4.0f);
+                    gMap.addCircle(gps);
+                    CameraPosition cameraPosition = new CameraPosition.Builder().target(userPos).zoom(18).build();
+                    gMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+                }
+
+            }
+        });
+
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
 
             private void resetSelectedMarker(){
@@ -291,6 +341,14 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
             private String removeSpaces(String itemSelected) {
                 return itemSelected.trim();
             }
+            private void adjustGpsIconVisibility() {
+                if (listView.getVisibility() == View.INVISIBLE || listView.getVisibility() == View.GONE) {
+                    mapGps.setVisibility(View.VISIBLE);
+                }
+                else {
+                    mapGps.setVisibility(View.INVISIBLE);
+                }
+            }
 
             @Override
             public boolean onQueryTextSubmit(String s) {
@@ -301,6 +359,7 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
                         listView.setVisibility(View.INVISIBLE);
                         pointToPosition(m.getPosition());
                         gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(m.getPosition(), 10));
+                        adjustGpsIconVisibility();
                     }
                 }
                 for (Marker m : townMarkers) {
@@ -308,6 +367,7 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
                         listView.setVisibility(View.INVISIBLE);
                         pointToPosition(m.getPosition());
                         gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(m.getPosition(), 13));
+                        adjustGpsIconVisibility();
                     }
                 }
                 resetSelectedMarker();
@@ -319,11 +379,13 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
                             pointToPosition(currentMarker.getPosition());
                             gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentMarker.getPosition(), 15));
                             objectMarkers.add(currentMarker);
+                            adjustGpsIconVisibility();
                         }
                     }
                 }
 
                 listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
                     @Override
                     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                         String selectedItem = (String) adapterView.getItemAtPosition(i);
@@ -337,6 +399,7 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
                                     pointToPosition(currentMarker.getPosition());
                                     gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentMarker.getPosition(), 15));
                                     objectMarkers.add(currentMarker);
+                                    adjustGpsIconVisibility();
                                 }
                             }
                         }
@@ -345,6 +408,7 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
                                 listView.setVisibility(View.INVISIBLE);
                                 pointToPosition(m.getPosition());
                                 gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(m.getPosition(), 10));
+                                adjustGpsIconVisibility();
                             }
                         }
                         for (Marker m : townMarkers) {
@@ -352,6 +416,7 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
                                 listView.setVisibility(View.INVISIBLE);
                                 pointToPosition(m.getPosition());
                                 gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(m.getPosition(), 13));
+                                adjustGpsIconVisibility();
                             }
                         }
                     }
@@ -368,14 +433,17 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
 
             @Override
             public boolean onQueryTextChange(String s) {
+
                 if (s!= null)
                 {
                     if (s.isEmpty()){
                         listView.setVisibility(View.INVISIBLE);
+                        adjustGpsIconVisibility();
                     }
                     else{
                         listView.setVisibility(View.VISIBLE);
                         adapter.getFilter().filter(s);
+                        adjustGpsIconVisibility();
                     }
                 }
                 listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -394,6 +462,7 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
                                     pointToPosition(currentMarker.getPosition());
                                     gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentMarker.getPosition(), 15));
                                     objectMarkers.add(currentMarker);
+                                    adjustGpsIconVisibility();
                                 }
                             }
                         }
@@ -402,6 +471,7 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
                                 pointToPosition(m.getPosition());
                                 listView.setVisibility(View.INVISIBLE);
                                 gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(m.getPosition(), 10));
+                                adjustGpsIconVisibility();
                             }
                         }
                         for (Marker m : townMarkers) {
@@ -409,6 +479,7 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
                                 pointToPosition(m.getPosition());
                                 listView.setVisibility(View.INVISIBLE);
                                 gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(m.getPosition(), 13));
+                                adjustGpsIconVisibility();
                             }
                         }
                     }
@@ -417,6 +488,7 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
             }
 
         });
+
 
         LatLng pos = getIntent().getParcelableExtra("Position");
         if(pos != null) {

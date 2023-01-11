@@ -2,6 +2,7 @@ package com.example.leisuremap;
 
 public class Object {
     private String name;
+    //<E extends Comparable <E>>
     private double distance;
     private double lat;
     private double lon;

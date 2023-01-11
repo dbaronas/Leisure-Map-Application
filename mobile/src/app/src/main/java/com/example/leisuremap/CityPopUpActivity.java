@@ -63,7 +63,7 @@ public class CityPopUpActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 RequestQueue queue = Volley.newRequestQueue(CityPopUpActivity.this);
-                String url ="http://193.219.91.104:1254/weather?city=" + city;
+                String url ="http://193.219.91.103:16059/weather?city=" + city;
                 //String url ="https://api.meteo.lt/v1/places/" + city + "/forecasts/long-term";
 
                 JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
@@ -113,7 +113,7 @@ public class CityPopUpActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View view) {
                     RequestQueue queue_events = Volley.newRequestQueue(CityPopUpActivity.this);
-                    String url_events = "http://193.219.91.104:1254/events";
+                    String url_events = "http://193.219.91.103:16059/events";
                     JsonObjectRequest request_events = new JsonObjectRequest(Request.Method.GET, url_events, null, new Response.Listener<JSONObject>() {
                         @Override
                         public void onResponse(JSONObject response) {
