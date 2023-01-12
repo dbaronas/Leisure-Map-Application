@@ -1,13 +1,20 @@
 package com.example.leisuremap;
 
+import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentSender;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.Color;
 import android.location.Location;
+import android.location.LocationManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -19,6 +26,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.android.volley.DefaultRetryPolicy;
@@ -28,6 +36,15 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.common.api.ResolvableApiException;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResponse;
+import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -42,6 +59,8 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -66,14 +85,17 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
     List<Object> objectList = new ArrayList<>();
     List<Marker> objectMarkers = new ArrayList<>();
     Marker currentMarker = null;
+    private LocationRequest locationRequest;
 
     boolean isLoggedIn = false;
     String username;
 
     LatLng userPos;
+    LatLng newUserPos;
 
     Marker userPolyMarker;
     Polyline polyline;
+    boolean stopRoute = false;
 
     ImageView mapGps;
 
@@ -85,6 +107,11 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
         getSupportActionBar().hide();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_leisure_map);
+
+        locationRequest = LocationRequest.create();
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        locationRequest.setInterval(5000);
+        locationRequest.setFastestInterval(2000);
 
         SupportMapFragment supportMapFragment = (SupportMapFragment)
                 getSupportFragmentManager().findFragmentById(R.id.map);
@@ -279,13 +306,16 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
         gMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(@NonNull Marker marker) {
+                if(!stopRoute)
+                    stopRoute = true;
                 String title = marker.getTitle();
                 String snip = marker.getSnippet();
                 if(Objects.equals(snip, "city") || Objects.equals(snip, "town"))
                 {
                     Intent intentCity = new Intent(getBaseContext(), CityPopUp.class);
                     intentCity.putExtra("City", title);
-                    startActivity(intentCity);
+                    startActivityForResult(intentCity, 0);
+                    currentMarker = marker;
                 }
                 else if(Objects.nonNull(snip)) {
                     Intent intentObject = new Intent(getBaseContext(), ObjectPopUp.class);
@@ -433,12 +463,13 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
             private void pointToPosition(LatLng position) {
                 CameraPosition cameraPosition = new CameraPosition.Builder().target(position).zoom(18).build();
                 gMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-
             }
 
             @Override
             public boolean onQueryTextChange(String s) {
 
+                if(!stopRoute && polyline != null)
+                    stopRoute = true;
                 if(polyline != null)
                     polyline.remove();
                 if(userPolyMarker != null)
@@ -522,7 +553,7 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
         }
     }
 
-    private void direction(LatLng userPos, String type) {
+    private void direction(LatLng userPos, String type, boolean zoom) {
         System.out.println(userPos);
         String s1 = currentMarker.getPosition().latitude + ", " + currentMarker.getPosition().longitude;
         String s2 = userPos.latitude + ", " + userPos.longitude;
@@ -573,7 +604,10 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
                                 .include(new LatLng(currentMarker.getPosition().latitude, currentMarker.getPosition().longitude)).build();
                         Point point = new Point();
                         getWindowManager().getDefaultDisplay().getSize(point);
-                        gMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, point.x, 150, 30));
+                        if(!zoom)
+                            gMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, point.x, 150, 30));
+                        else
+                            gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(userPolyMarker.getPosition(), 20));
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -626,10 +660,22 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
         super.onActivityResult(requestCode, resultCode, data);
         if(polyline != null)
             polyline.remove();
-        if(resultCode==1)
-            direction(userPos, "walking");
-        else if(resultCode==2)
-            direction(userPos, "driving");
+        if(resultCode==1) {
+            if(userPolyMarker != null)
+                userPolyMarker.remove();
+            stopRoute = false;
+            newUserPos = userPos;
+            direction(userPos, "walking", false);
+            continueRoute("walking");
+        }
+        else if(resultCode==2) {
+            if(userPolyMarker != null)
+                userPolyMarker.remove();
+            stopRoute = false;
+            newUserPos = userPos;
+            direction(userPos, "driving", false);
+            continueRoute("driving");
+        }
     }
 
     public boolean checkUserStatus() {
@@ -637,5 +683,120 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
     }
     public String checkUsername() {
         return getIntent().getStringExtra("Username");
+    }
+
+
+    private void getCurrentLocation() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (ActivityCompat.checkSelfPermission(LeisureMap.this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                if (isGPSEnabled()) {
+                    LocationServices.getFusedLocationProviderClient(LeisureMap.this)
+                            .requestLocationUpdates(locationRequest, new LocationCallback() {
+                                @Override
+                                public void onLocationResult(@NonNull LocationResult locationResult) {
+                                    super.onLocationResult(locationResult);
+
+                                    LocationServices.getFusedLocationProviderClient(LeisureMap.this)
+                                            .removeLocationUpdates(this);
+
+                                    if (locationResult.getLocations().size() > 0){
+                                        int index = locationResult.getLocations().size() - 1;
+                                        double latitude = locationResult.getLocations().get(index).getLatitude();
+                                        double longitude = locationResult.getLocations().get(index).getLongitude();
+                                        newUserPos = new LatLng(latitude, longitude);
+                                    }
+                                }
+                            }, Looper.getMainLooper());
+                    waitForPosition();
+                }
+                else {
+                    turnOnGPS();
+                }
+            }
+            else {
+                requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+            }
+        }
+    }
+
+    private void turnOnGPS() {
+        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
+                .addLocationRequest(locationRequest);
+        builder.setAlwaysShow(true);
+
+        Task<LocationSettingsResponse> result = LocationServices.getSettingsClient(getApplicationContext())
+                .checkLocationSettings(builder.build());
+
+        result.addOnCompleteListener(new OnCompleteListener<LocationSettingsResponse>() {
+            @Override
+            public void onComplete(@NonNull Task<LocationSettingsResponse> task) {
+                try {
+                    LocationSettingsResponse response = task.getResult(ApiException.class);
+                    Toast.makeText(LeisureMap.this, "GPS is turned on", Toast.LENGTH_SHORT).show();
+                }
+                catch (ApiException e) {
+                    switch (e.getStatusCode()) {
+                        case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+
+                            try {
+                                ResolvableApiException resolvableApiException = (ResolvableApiException) e;
+                                resolvableApiException.startResolutionForResult(LeisureMap.this, 2);
+                            } catch (IntentSender.SendIntentException ex) {
+                                ex.printStackTrace();
+                            }
+                            break;
+
+                        case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
+                            break;
+                    }
+                }
+            }
+        });
+    }
+
+    private boolean isGPSEnabled() {
+        LocationManager locationManager = null;
+        boolean isEnabled = false;
+        if (locationManager == null) {
+            locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        }
+        isEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        return isEnabled;
+    }
+
+    public void waitForPosition() {
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            public void run() {
+                if(newUserPos == null)
+                    waitForPosition();
+            }
+        }, 1000);
+    }
+
+    public void continueRoute(String type) {
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            public void run() {
+                if(polyline != null && !stopRoute) {
+                    System.out.println(stopRoute);
+                    System.out.println("Route redrawn");
+                    userPos = newUserPos;
+                    getCurrentLocation();
+                    if(userPolyMarker != null)
+                        userPolyMarker.remove();
+                    if(polyline != null)
+                        polyline.remove();
+                    direction(newUserPos, type, true);
+                    continueRoute(type);
+                }
+            }
+        }, 5000);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        stopRoute = true;
     }
 }

@@ -3,7 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/favPlace"
+    android:id="@+id/similarUsers"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true">
@@ -11,7 +11,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".FavoritePlaces">
+        tools:context=".SimilarUserRecommendations">
 
         <LinearLayout
             android:id="@+id/linearLayout"
@@ -27,11 +27,12 @@
             android:layout_height="54dp"
             android:layout_marginTop="30dp"
             android:gravity="center_vertical|center_horizontal"
-            android:text="Saved places"
-            android:textSize="32sp"
+            android:text="Similar users searched for:"
+            android:textSize="24sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

@@ -14,8 +14,8 @@
         android:layout_width="205dp"
         android:layout_height="63dp"
         android:layout_marginTop="20dp"
-        android:textSize="14sp"
         android:text="@string/find_activities"
+        android:textSize="14sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/map" />
@@ -36,31 +36,42 @@
         android:layout_width="205dp"
         android:layout_height="63dp"
         android:layout_marginTop="20dp"
-        android:textSize="14sp"
         android:text="@string/favorite_places"
+        android:textSize="14sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/findActivities" />
+
+    <Button
+        android:id="@+id/similarUsers"
+        android:layout_width="205dp"
+        android:layout_height="63dp"
+        android:layout_marginTop="20dp"
+        android:text="Similar User Recommendations"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/favoritePlaces" />
 
     <Button
         android:id="@+id/signIn"
         android:layout_width="205dp"
         android:layout_height="63dp"
         android:layout_marginTop="20dp"
-        android:textSize="14sp"
-        android:text="@string/sign_in_sign_up"
         android:onClick="saveLoggedInSession"
+        android:text="@string/sign_in_sign_up"
+        android:textSize="14sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/favoritePlaces" />
+        app:layout_constraintTop_toBottomOf="@+id/similarUsers" />
 
     <Button
         android:id="@+id/logOut"
         android:layout_width="205dp"
         android:layout_height="63dp"
         android:layout_marginTop="20dp"
-        android:textSize="14sp"
         android:text="@string/log_out"
+        android:textSize="14sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/signIn" />
@@ -69,7 +80,7 @@
         android:id="@+id/textView"
         android:layout_width="174dp"
         android:layout_height="57dp"
-        android:layout_marginTop="88dp"
+        android:layout_marginTop="50dp"
         android:gravity="center_vertical|center_horizontal"
         android:text="@string/main_menu"
         android:textSize="32sp"

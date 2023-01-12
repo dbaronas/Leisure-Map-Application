@@ -46,7 +46,7 @@ import java.util.List;
 
 public class MainMenu extends AppCompatActivity {
 
-    private Button b_map, b_activities, b_sign_in, b_logOut, b_favorite_places;
+    private Button b_map, b_activities, b_sign_in, b_logOut, b_favorite_places, b_similar_users;
     private LocationRequest locationRequest;
     private LatLng pos;
     boolean isLoggedIn = false;
@@ -108,6 +108,19 @@ public class MainMenu extends AppCompatActivity {
             }
         });
 
+        b_similar_users = findViewById(R.id.similarUsers);
+        b_similar_users.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(pos == null){
+                    getCurrentLocation();
+                    i = 3;
+                }
+                else
+                    openSimilarUserRec();
+            }
+        });
+
         b_sign_in = findViewById(R.id.signIn);
         b_sign_in.setOnClickListener(view -> openLogin());
         b_logOut = findViewById(R.id.logOut);
@@ -126,6 +139,7 @@ public class MainMenu extends AppCompatActivity {
             b_activities.setEnabled(false);
             b_logOut.setEnabled(false);
             b_favorite_places.setEnabled(false);
+            b_similar_users.setEnabled(false);
         }
         else {
             b_sign_in.setEnabled(false);
@@ -299,6 +313,13 @@ public class MainMenu extends AppCompatActivity {
         startActivity(intent);
     }
 
+    public void openSimilarUserRec() {
+        Intent intent = new Intent(this, SimilarUserRecommendations.class);
+        intent.putExtra("UserStatus", isLoggedIn);
+        intent.putExtra("Username", username);
+        startActivity(intent);
+    }
+
     public void openFavoritePlaces() {
         Intent intent = new Intent(this, FavoritePlaces.class);
         intent.putExtra("UserPos", pos);
@@ -326,9 +347,10 @@ public class MainMenu extends AppCompatActivity {
                 else if (i==1){
                     openLeisureMap();
                 }
-                else
+                else if (i==2)
                     openFavoritePlaces();
-
+                else
+                    openSimilarUserRec();
             }
         }, 1000);
     }

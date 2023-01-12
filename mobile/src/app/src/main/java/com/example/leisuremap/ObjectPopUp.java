@@ -25,7 +25,7 @@ import org.json.JSONObject;
 
 public class ObjectPopUp extends AppCompatActivity {
 
-    Button quickRouteButton, weatherButton, submitButton, favoriteButton;
+    Button quickRouteButtonW, quickRouteButtonD, weatherButton, submitButton, favoriteButton;
     RatingBar ratingBar;
 
     boolean isLoggedIn = false;
@@ -95,21 +95,21 @@ public class ObjectPopUp extends AppCompatActivity {
                     queue.add(request);
                 }
             });
-
-            quickRouteButton = findViewById(R.id.quickRouteW);
-            quickRouteButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View arg0) {
-                    setResult(1, intent);
-                    finish();
-                }
-            });
         }
 
-        quickRouteButton = findViewById(R.id.quickRouteD);
-        quickRouteButton.setOnClickListener(new View.OnClickListener() {
+        quickRouteButtonW = findViewById(R.id.quickRouteW);
+        quickRouteButtonW.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View arg0) {
+            public void onClick(View view) {
+                setResult(1, intent);
+                finish();
+            }
+        });
+
+        quickRouteButtonD = findViewById(R.id.quickRouteD);
+        quickRouteButtonD.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
                 setResult(2, intent);
                 finish();
             }

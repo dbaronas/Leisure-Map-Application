@@ -40,7 +40,7 @@ public class CityPopUp extends AppCompatActivity {
         int width = dm.widthPixels;
         int height = dm.heightPixels;
 
-        getWindow().setLayout((int)(width*0.8), (int)(height*0.2));
+        getWindow().setLayout((int)(width*0.8), (int)(height*0.6));
 
         String city = getIntent().getStringExtra("City");
         cityText = findViewById(R.id.cityText);
@@ -97,6 +97,37 @@ public class CityPopUp extends AppCompatActivity {
                 });
                 request.setRetryPolicy(new DefaultRetryPolicy(60000, 1, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
                 queue.add(request);
+            }
+        });
+
+        Button quickRouteButtonD = new Button(this);
+        quickRouteButtonD.setLayoutParams(params);
+        quickRouteButtonD.setText("Quickest route (driving)");
+        quickRouteButtonD.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+        layout.addView(quickRouteButtonD);
+        layout.setOrientation(LinearLayout.VERTICAL);
+
+        Button quickRouteButtonW = new Button(this);
+        quickRouteButtonW.setLayoutParams(params);
+        quickRouteButtonW.setText("Quickest route (walking)");
+        quickRouteButtonW.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+        layout.addView(quickRouteButtonW);
+        layout.setOrientation(LinearLayout.VERTICAL);
+
+        Intent intent = new Intent();
+        quickRouteButtonW.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                setResult(1, intent);
+                finish();
+            }
+        });
+
+        quickRouteButtonD.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                setResult(2, intent);
+                finish();
             }
         });
 
