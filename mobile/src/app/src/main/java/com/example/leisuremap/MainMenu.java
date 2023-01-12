@@ -387,6 +387,7 @@ public class MainMenu extends AppCompatActivity {
         Intent intent = new Intent(this, SimilarUserRecommendations.class);
         intent.putExtra("UserStatus", isLoggedIn);
         intent.putExtra("Username", username);
+        intent.putExtra("UserPos", pos);
         startActivity(intent);
     }
 

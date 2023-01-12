@@ -129,7 +129,7 @@ public class FavoritePlaces extends AppCompatActivity {
                 intent.putExtra("UserPos", userPos);
                 intent.putExtra("Username", username);
                 intent.putExtra("UserStatus", isLoggedIn);
-                startActivity(intent);
+                startActivityForResult(intent, 5);
             }
         });
 
