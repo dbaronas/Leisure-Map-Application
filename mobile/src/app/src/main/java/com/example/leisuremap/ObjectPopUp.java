@@ -48,7 +48,7 @@ public class ObjectPopUp extends AppCompatActivity {
         Intent intent = new Intent();
         String city = getIntent().getStringExtra("City");
         String id = getIntent().getStringExtra("Id");
-        System.out.println(id);
+        //System.out.println(id);
         isLoggedIn = checkUserStatus();
         username = checkUsername();
 

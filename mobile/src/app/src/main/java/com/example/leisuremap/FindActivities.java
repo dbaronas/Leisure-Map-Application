@@ -1,6 +1,9 @@
 package com.example.leisuremap;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
 import android.location.Location;
@@ -41,6 +44,8 @@ public class FindActivities extends AppCompatActivity {
     LatLng userPos;
     boolean isLoggedIn = false;
     String username;
+    ArrayList <String> clickedObjectId = new ArrayList<>();
+    ArrayList <String> clickedObjectType = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +54,13 @@ public class FindActivities extends AppCompatActivity {
         setContentView(R.layout.activity_find_activities);
 
         userPos = getIntent().getParcelableExtra("UserPos"); // getting user position
+        Activity a = this;
+        if(a.getCallingActivity().getClassName().toString().equals("com.example.leisuremap.MainMenu")){
+            clickedObjectId.clear();
+            clickedObjectType.clear();
+            clickedObjectId.addAll(getIntent().getStringArrayListExtra("oID"));
+            clickedObjectType.addAll(getIntent().getStringArrayListExtra("oType"));
+        }
         isLoggedIn = checkUserStatus();
         username = checkUsername();
 
@@ -90,6 +102,7 @@ public class FindActivities extends AppCompatActivity {
                     JSONArray array = response.getJSONArray("Table");
                     for(int i = 0; i < array.length(); i++) {
                         JSONObject element = (JSONObject) array.get(i);
+                        String objId = element.get("id").toString();
                         String latitude = element.get("lat").toString();
                         String longitude = element.get("lon").toString();
                         double lon = Double.valueOf(longitude);
@@ -133,7 +146,7 @@ public class FindActivities extends AppCompatActivity {
 
                         double score = (10 - Math.sqrt(distance)) * 2 + (objRating * 2);
 
-                        Object obj = new Object(objName, distance, lat, lon, objRating, objCity, objType, score);
+                        Object obj = new Object(objName, distance, lat, lon, objRating, objCity, objType, score, objId);
                         objects.add(obj);
                     }
                 } catch (JSONException e) {
@@ -210,6 +223,17 @@ public class FindActivities extends AppCompatActivity {
         });
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == 3) {
+            clickedObjectId.addAll(data.getStringArrayListExtra("result3"));
+            clickedObjectType.addAll(data.getStringArrayListExtra("result4"));
+            System.out.println(clickedObjectId);
+            System.out.println(clickedObjectType);
+        }
+    }
+
     public void searchObject(int distance, int rating, ArrayList<String> chosenCities, ArrayList<String> chosenTypes) {
         LinearLayout linearLayout = findViewById(R.id.linearLayout);
         linearLayout.removeAllViews();
@@ -227,6 +251,8 @@ public class FindActivities extends AppCompatActivity {
 
     public void createTextViews(Object object) {
         LatLng pos = new LatLng(object.getLat(), object.getLon());
+        String id = object.getId();
+        String type = object.getType();
         LinearLayout linearLayout = findViewById(R.id.linearLayout);
         TextView textView = new TextView(FindActivities.this);
         LayoutParams layoutParams = new LayoutParams(1000, 300);
@@ -243,14 +269,25 @@ public class FindActivities extends AppCompatActivity {
         textView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                clickedObjectId.add(id);
+                clickedObjectType.add(type);
+                System.out.println(clickedObjectId);
+                System.out.println("----------------------------------------------------------------");
+                System.out.println(clickedObjectType);
                 Intent intent = new Intent(getBaseContext(), LeisureMap.class);
                 intent.putExtra("Position", pos);
                 intent.putExtra("UserPos", userPos);
                 intent.putExtra("Username", username);
                 intent.putExtra("UserStatus", isLoggedIn);
-                startActivity(intent);
+                intent.putStringArrayListExtra("oID", clickedObjectId);
+                intent.putStringArrayListExtra("oType", clickedObjectType);
+                intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                startActivityForResult(intent, 3);
+//                System.out.println(clickedObjectId);
+//                System.out.println(clickedObjectType);
             }
         });
+        //is sito siust masyva i leisuremap
         linearLayout.addView(textView);
     }
 
@@ -261,6 +298,30 @@ public class FindActivities extends AppCompatActivity {
             }
         });
     }
+
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent(this, MainMenu.class);
+        intent.putStringArrayListExtra("result3", clickedObjectId);
+        intent.putStringArrayListExtra("result4", clickedObjectType);
+        setResult(Activity.RESULT_OK, intent);
+        finish();
+    }
+
+//    @Override
+//    protected void onResume() {
+//        super.onResume();
+//        clickedObjectId = getIntent().getStringArrayListExtra("objectID1");
+//        clickedObjectType = getIntent().getStringArrayListExtra("objectType1");
+//    }
+@Override
+protected void onDestroy() {
+    super.onDestroy();
+    Intent intent = new Intent(this, ExitService.class);
+    intent.putStringArrayListExtra("ID", clickedObjectId);
+    intent.putStringArrayListExtra("Type", clickedObjectType);
+    startService(intent);
+}
 
     public boolean checkUserStatus() {
         return getIntent().getBooleanExtra("UserStatus", false);

@@ -1,5 +1,6 @@
 package com.example.leisuremap;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Point;
@@ -66,6 +67,8 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
     List<Object> objectList = new ArrayList<>();
     List<Marker> objectMarkers = new ArrayList<>();
     Marker currentMarker = null;
+    ArrayList <String> clickedObjectId = new ArrayList<>();
+    ArrayList <String> clickedObjectType = new ArrayList<>();
 
     boolean isLoggedIn = false;
     String username;
@@ -85,6 +88,14 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
         getSupportActionBar().hide();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_leisure_map);
+        Activity a = this;
+        if(a.getCallingActivity().getClassName().toString().equals("com.example.leisuremap.MainMenu")){
+            System.out.println("--------------------------------------------------------------------");
+            clickedObjectId.addAll(getIntent().getStringArrayListExtra("oID"));
+            clickedObjectType.addAll(getIntent().getStringArrayListExtra("oType"));
+        }
+
+
 
         SupportMapFragment supportMapFragment = (SupportMapFragment)
                 getSupportFragmentManager().findFragmentById(R.id.map);
@@ -291,7 +302,7 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
                     Intent intentObject = new Intent(getBaseContext(), ObjectPopUp.class);
                     for(Object o : objectList) {
                         if(title.equals(o.getName())) {
-                            System.out.println(title + "    " + o.getName() + "    " + o.getCity());
+                            //System.out.println(title + "    " + o.getName() + "    " + o.getCity());
                             intentObject.putExtra("Username", username);
                             intentObject.putExtra("UserStatus", isLoggedIn);
                             intentObject.putExtra("City", o.getCity());
@@ -346,6 +357,7 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
             private String removeSpaces(String itemSelected) {
                 return itemSelected.trim();
             }
+
             private void adjustGpsIconVisibility() {
                 if (listView.getVisibility() == View.INVISIBLE || listView.getVisibility() == View.GONE) {
                     mapGps.setVisibility(View.VISIBLE);
@@ -385,9 +397,13 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
                             gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentMarker.getPosition(), 15));
                             objectMarkers.add(currentMarker);
                             adjustGpsIconVisibility();
+                            clickedObjectId.add(o.getId());
+                            clickedObjectType.add(o.getType());
                         }
                     }
                 }
+//                System.out.println("search fullname " + clickedObjectId);
+//                System.out.println("search fullname " + clickedObjectType);
 
                 listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
@@ -405,9 +421,13 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
                                     gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentMarker.getPosition(), 15));
                                     objectMarkers.add(currentMarker);
                                     adjustGpsIconVisibility();
+                                    clickedObjectId.add(o.getId());
+                                    clickedObjectType.add(o.getType());
                                 }
                             }
                         }
+//                        System.out.println("listview fullname " + clickedObjectId);
+//                        System.out.println("listview fullname " + clickedObjectType);
                         for (Marker m : cityMarkers) {
                             if(m.getTitle().equals(removeSpaces(removeCharsAfter(selectedItem)))) {
                                 listView.setVisibility(View.INVISIBLE);
@@ -433,7 +453,6 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
             private void pointToPosition(LatLng position) {
                 CameraPosition cameraPosition = new CameraPosition.Builder().target(position).zoom(18).build();
                 gMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-
             }
 
             @Override
@@ -448,7 +467,7 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
 
                 if (s!= null)
                 {
-                    if (s.isEmpty()){
+                    if (s.isEmpty()) {
                         listView.setVisibility(View.INVISIBLE);
                         adjustGpsIconVisibility();
                     }
@@ -464,11 +483,9 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
                     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                         String selectedItem = (String) adapterView.getItemAtPosition(i);
 
-                        //System.out.println("selected item:" + removeCharsBefore(selectedItem));
                         resetSelectedMarker();
                         for (Object o : objectList) {
                             if((removeSpaces(removeCharsBefore(selectedItem))).equals(o.getDistanceString())){
-                                //System.out.println("selecteditem: " + removeSpaces(removeCharsBefore(selectedItem)) + " object distance: " + o.getDistanceString());
                                 if (currentMarker==null) {
                                     currentMarker = gMap.addMarker(new MarkerOptions().position(new LatLng(o.getLat(), o.getLon())).title(o.getName()).snippet(o.getType()).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
                                     listView.setVisibility(View.INVISIBLE);
@@ -476,6 +493,8 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
                                     gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentMarker.getPosition(), 15));
                                     objectMarkers.add(currentMarker);
                                     adjustGpsIconVisibility();
+                                    clickedObjectId.add(o.getId());
+                                    clickedObjectType.add(o.getType());
                                 }
                             }
                         }
@@ -495,6 +514,8 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
                                 adjustGpsIconVisibility();
                             }
                         }
+//                        System.out.println("id listview nepilnai " + clickedObjectId);
+//                        System.out.println("id listview nepilnai " + clickedObjectType);
                     }
                 });
                 return false;
@@ -503,13 +524,16 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
 
 
         LatLng pos = getIntent().getParcelableExtra("Position");
+//        System.out.println(tempClickedObjectId);
+//        System.out.println(tempclickedObjectType);
+
         if(pos != null) {
             Handler handler = new Handler();
             handler.postDelayed(new Runnable() {
                 public void run() {
                     for (Object o : objectList) {
                         LatLng pos2 = new LatLng(o.getLat(), o.getLon());
-                        System.out.println("Pos1 = " + pos + " Pos2 = "  + pos2);
+                        //System.out.println("Pos1 = " + pos + " Pos2 = "  + pos2);
                         if(pos.equals(pos2)){
                             currentMarker = gMap.addMarker(new MarkerOptions().position(new LatLng(o.getLat(), o.getLon())).title(o.getName()).snippet(o.getType()).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
                             pointToPosition(currentMarker.getPosition());
@@ -523,7 +547,7 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
     }
 
     private void direction(LatLng userPos, String type) {
-        System.out.println(userPos);
+        //System.out.println(userPos);
         String s1 = currentMarker.getPosition().latitude + ", " + currentMarker.getPosition().longitude;
         String s2 = userPos.latitude + ", " + userPos.longitude;
         RequestQueue requestQueue = Volley.newRequestQueue(this);
@@ -630,6 +654,40 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
             direction(userPos, "walking");
         else if(resultCode==2)
             direction(userPos, "driving");
+    }
+
+    @Override
+    public void onBackPressed() {
+
+
+        //System.out.println(getIntent().getStringExtra("Parent"));
+        if (getIntent().getStringExtra("Parent") == null) {
+            Intent intent = new Intent(this, FindActivities.class);
+            intent.putStringArrayListExtra("result3", clickedObjectId);
+            intent.putStringArrayListExtra("result4", clickedObjectType);
+            setResult(Activity.RESULT_OK, intent);
+            finish();
+        }
+        else {
+            Intent intent = new Intent(this, MainMenu.class);
+            intent.putStringArrayListExtra("result1", clickedObjectId);
+            intent.putStringArrayListExtra("result2", clickedObjectType);
+            setResult(Activity.RESULT_OK, intent);
+            finish();
+        }
+
+
+//        intent.putStringArrayListExtra("objectID2", clickedObjectId);
+//        intent.putStringArrayListExtra("objectType2", clickedObjectType);
+
+    }
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Intent intent = new Intent(this, ExitService.class);
+        intent.putStringArrayListExtra("ID", clickedObjectId);
+        intent.putStringArrayListExtra("Type", clickedObjectType);
+        startService(intent);
     }
 
     public boolean checkUserStatus() {

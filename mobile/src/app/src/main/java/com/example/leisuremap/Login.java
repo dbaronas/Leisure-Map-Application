@@ -110,10 +110,11 @@ public class Login extends AppCompatActivity {
 
         if (un != null && pw != null && st == true ) {
             Login login = new Login();
-            //login.moveToMainMenu();
-            SimpleDateFormat formatter= new SimpleDateFormat("HH:mm");
-            Date startTime = new Date(System.currentTimeMillis());
-            System.out.println("startTime: " + formatter.format(startTime));
+            login.moveToMainMenu();
+            //System.out.println("startTime: " + formatter.format(startTime));
+
+
+
         }
 //        else if (st != true && isAppRunning.isRunning() == true ) {
 //            Login login = new Login();
@@ -127,24 +128,8 @@ public class Login extends AppCompatActivity {
         else {
 
         }
-        System.out.println(isRunning());
+        //System.out.println(isRunning());
 
-    }
-
-    public int isRunning() {
-        ActivityManager m = (ActivityManager) this.getSystemService( ACTIVITY_SERVICE );
-        List<ActivityManager.RunningTaskInfo> runningTaskInfoList =  m.getRunningTasks(10);
-        Iterator<ActivityManager.RunningTaskInfo> itr = runningTaskInfoList.iterator();
-        int n=0;
-        while(itr.hasNext()){
-            n++;
-            itr.next();
-        }
-        if(n==0){ // App is killed
-            //return false;
-        }
-        return n;
-        //return true; // App is in background or foreground
     }
 
     public void openForgotPass() {
@@ -179,6 +164,7 @@ public class Login extends AppCompatActivity {
             @Override
             public void onResponse(JSONObject response) {
                 //String message;
+
                 try {
                     JSONObject status = response.getJSONObject("STATUS");
                     isLoggedIn = (boolean) status.get("LOGIN");
@@ -190,6 +176,11 @@ public class Login extends AppCompatActivity {
                     guideText.setText("Logged in");
                     intent.putExtra("UserStatus", isLoggedIn);
                     intent.putExtra("Username", username);
+                    SimpleDateFormat formatter= new SimpleDateFormat("HH:mm");
+                    Date startTime = new Date(System.currentTimeMillis());
+                    String time = formatter.format(startTime);
+                    intent.putExtra("startTime", time);
+                    //System.out.println("startTime" + startTime);
                     startActivity(intent);
                     MainMenu.fa.finish();
                     finish();

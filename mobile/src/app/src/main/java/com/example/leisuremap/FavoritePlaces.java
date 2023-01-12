@@ -39,6 +39,7 @@ public class FavoritePlaces extends AppCompatActivity {
     boolean isLoggedIn = false;
     String username;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         getSupportActionBar().hide();
@@ -95,7 +96,7 @@ public class FavoritePlaces extends AppCompatActivity {
                 }
                 sortList();
                 for(Object o:objects) {
-                    System.out.println(o);
+                    //System.out.println(o);
                     createTextViews(o);
                 }
             }
@@ -134,6 +135,7 @@ public class FavoritePlaces extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
         linearLayout.addView(textView);
     }
 
