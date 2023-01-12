@@ -1,19 +1,6 @@
 const pcc = require("calculate-correlation")
 const pool = require('./database')
 
-const incTag = (req, res) => {
-    const data = req.query.username
-    const username = data.toLowerCase()
-    const id = req.query.id
-
-    pool.query(`UPDATE searched_tags set count=count + 1 WHERE username='${username}' AND tag_id=${id}`), (error, results) => {
-        if(error){
-            throw error
-        }
-    }
-    const STATUS =  'Searched tag recorded'
-    res.send({STATUS})
-}
 
 const getRecommendation = (req, res) => {
     const data = req.query.username
@@ -88,6 +75,5 @@ const getRecommendation = (req, res) => {
 }
 
 module.exports = {
-    getRecommendation,
-    incTag
+    getRecommendation
 }

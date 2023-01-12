@@ -149,6 +149,7 @@ const searchSession = async (req, res) => {
   const start = req.body.start
   const end = req.body.end
   const places = req.body.places
+  const tags = req.body.tags
 
   await new Promise((resolve, reject) => {
     pool.query(`INSERT INTO sessions (username, start_time, end_time) VALUES ($1, $2, $3)`, [username, start, end], (error, results) => {
@@ -162,12 +163,12 @@ const searchSession = async (req, res) => {
     if(error){
       throw error
     }
-    const lastId = results.rows[results.rows.length - 1].session_id
-    const date = results.rows[results.rows.length - 1].date
+    let lastId = results.rows[results.rows.length - 1].session_id
+    let date = results.rows[results.rows.length - 1].date
     await new Promise(async (resolve, reject) => {
       for(let i = 0; i < places.length; i++){
         await new Promise((resolve, reject) => {
-          pool.query(`INSERT INTO searched_places (session_id, place_id) VALUES ($1, $2, $3)`, [lastId, places[i].id, date], (error, results) => {
+          pool.query(`INSERT INTO searched_places (session_id, place_id, date) VALUES ($1, $2, $3)`, [lastId, places[i], date], (error, results) => {
             if(error){
               throw error
             }
@@ -177,9 +178,26 @@ const searchSession = async (req, res) => {
       }
       resolve()
     })
-    res.json({STATUS: 'Done'})
   })
 
+  await new Promise(async (resolve, reject) => {
+    for(let i = 0; i < tags.length; i++){
+      await new Promise((resolve, reject) => {
+        pool.query(`SELECT * FROM tags WHERE tag='${tags[i]}'`, (error, results) => {
+          let tagid = results.rows[0].tag_id
+          pool.query(`UPDATE searched_tags set count=count + 1 WHERE username='${username}' AND tag_id=${tagid}`, (error, results) => {
+            if(error){
+                throw error
+            }
+            resolve()
+        })
+        })
+      })
+    }
+    resolve()
+  })
+
+  res.json({STATUS: 'Done'})
 }
 
 module.exports = {

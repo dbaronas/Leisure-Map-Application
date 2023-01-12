@@ -47,7 +47,6 @@ app.post('/session', application.db.searchSession)
 
 //Recommendation
 app.get('/recommendation', application.recom.getRecommendation)
-app.get('/recommendation/recordtag', application.recom.incTag)
 
 app.listen(port, () => {
     console.log(`App running on port ${port}.`)
