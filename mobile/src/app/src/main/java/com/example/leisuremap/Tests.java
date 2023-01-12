@@ -1,7 +1,5 @@
 package com.example.leisuremap;
 
-import com.google.android.gms.maps.model.Marker;
-
 import java.text.Normalizer;
 
 public class Tests {

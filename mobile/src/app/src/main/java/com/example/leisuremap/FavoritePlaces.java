@@ -9,7 +9,6 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -38,7 +37,6 @@ public class FavoritePlaces extends AppCompatActivity {
 
     boolean isLoggedIn = false;
     String username;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,7 +94,6 @@ public class FavoritePlaces extends AppCompatActivity {
                 }
                 sortList();
                 for(Object o:objects) {
-                    //System.out.println(o);
                     createTextViews(o);
                 }
             }

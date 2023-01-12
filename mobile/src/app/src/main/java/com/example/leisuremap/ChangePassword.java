@@ -22,18 +22,12 @@ import com.android.volley.toolbox.Volley;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.Base64;
-
 import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
 
 public class ChangePassword extends AppCompatActivity {
 
@@ -61,12 +55,10 @@ public class ChangePassword extends AppCompatActivity {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
                 if (isChecked) {
-                    // To hide password
                     current_pass.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
                     new_pass.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
                     new_pass2.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
                 } else {
-                    // To show password
                     current_pass.setTransformationMethod(PasswordTransformationMethod.getInstance());
                     new_pass.setTransformationMethod(PasswordTransformationMethod.getInstance());
                     new_pass2.setTransformationMethod(PasswordTransformationMethod.getInstance());
@@ -75,15 +67,11 @@ public class ChangePassword extends AppCompatActivity {
         });
 
         b_send.setOnClickListener(view -> {
-            try {
-                printInfo();
-            } catch (NoSuchPaddingException | NoSuchAlgorithmException | InvalidAlgorithmParameterException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
-                e.printStackTrace();
-            }
+            printInfo();
         });
     }
 
-    public void printInfo() throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+    public void printInfo() {
         String username = username_input.getText().toString();
         String crpass = current_pass.getText().toString();
         String newpass = new_pass.getText().toString();
@@ -99,9 +87,8 @@ public class ChangePassword extends AppCompatActivity {
         else if (!newpass.matches(newpass2))
             guideText.setText("Entered passwords do not match");
         else {
-            HashPassword hashtCrPass = new HashPassword(crpass);
             HashPassword hashNewPass = new HashPassword(newpass);
-            changePass(username, hashtCrPass.hashing(), hashNewPass.hashing());
+            changePass(username, crpass, hashNewPass.hashing());
         }
     }
 

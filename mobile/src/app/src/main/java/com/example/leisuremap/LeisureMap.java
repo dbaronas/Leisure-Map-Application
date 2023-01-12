@@ -1,6 +1,5 @@
 package com.example.leisuremap;
 
-
 import android.Manifest;
 import android.content.Context;
 import android.app.Activity;
@@ -9,7 +8,6 @@ import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Point;
-import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
@@ -21,7 +19,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.Toast;
@@ -53,7 +50,6 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
-import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MapStyleOptions;
@@ -70,8 +66,6 @@ import org.json.JSONObject;
 
 import java.text.Normalizer;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
@@ -104,8 +98,6 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
     Polyline polyline;
     boolean stopRoute = false;
 
-    ImageView mapGps;
-
     ArrayList<String> arrayList = new ArrayList<>();
     ArrayAdapter<String> adapter;
 
@@ -116,12 +108,9 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
         setContentView(R.layout.activity_leisure_map);
         Activity a = this;
         if(a.getCallingActivity().getClassName().toString().equals("com.example.leisuremap.MainMenu")){
-            System.out.println("--------------------------------------------------------------------");
             clickedObjectId.addAll(getIntent().getStringArrayListExtra("oID"));
             clickedObjectType.addAll(getIntent().getStringArrayListExtra("oType"));
         }
-
-
 
         locationRequest = LocationRequest.create();
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
@@ -142,8 +131,6 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
                 R.layout.list_item, R.id.text_view, arrayList);
         listView.setAdapter(adapter);
         listView.setVisibility(View.GONE);
-        mapGps = (ImageView) findViewById(R.id.ic_gps);
-        mapGps.setVisibility(View.VISIBLE);
 
         userPos = getIntent().getParcelableExtra("UserPos");
         isLoggedIn = checkUserStatus();
@@ -179,16 +166,14 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
             Log.e(TAG, "Can't find style. Error: ", e);
         }
 
-        LatLng userPos = getIntent().getParcelableExtra("Pos"); // getting user's position
-
+        LatLng userPos = getIntent().getParcelableExtra("UserPos");
         RequestQueue queue_objects = Volley.newRequestQueue(LeisureMap.this);
-        //String url_objects = "https://overpass-api.de/api/interpreter?data=%2F*%0AThis%20has%20been%20generated%20by%20the%20overpass-turbo%20wizard.%0AThe%20original%20search%20was%3A%0A%E2%80%9Ctourism%3Dmuseum%20in%20lithuania%E2%80%9D%0A*%2F%0A%5Bout%3Ajson%5D%5Btimeout%3A25%5D%3B%0A%2F%2F%20fetch%20area%20%E2%80%9Clithuania%E2%80%9D%20to%20search%20in%0Aarea%28id%3A3600072596%29-%3E.searchArea%3B%0A%2F%2F%20gather%20results%0A%28%0A%20%20%2F%2F%20query%20part%20for%3A%20%E2%80%9Ctourism%3Dmuseum%E2%80%9D%0A%20%20node%5B%22tourism%22%3D%22museum%22%5D%28area.searchArea%29%3B%0A%20%20way%5B%22tourism%22%3D%22museum%22%5D%28area.searchArea%29%3B%0A%20%20relation%5B%22tourism%22%3D%22museum%22%5D%28area.searchArea%29%3B%0A%29%3B%0A%2F%2F%20print%20results%0Aout%20body%3B%0A%3E%3B%0Aout%20skel%20qt%3B";
         String url_objects = "http://193.219.91.103:16059/table?name=place";
         JsonObjectRequest request_objects = new JsonObjectRequest(Request.Method.GET, url_objects, null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
                 try {
-                    //JSONArray array = response.getJSONArray("elements");
+
                     JSONArray array = response.getJSONArray("Table");
                     for(int i = 0; i < array.length(); i++) {
                         JSONObject element = (JSONObject) array.get(i);
@@ -201,8 +186,6 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
                         if(objName.equals("null")) {
                             objName = objType;
                         }
-                        //JSONObject obj = (JSONObject) element.get("tags");
-                        //String objName = obj.get("name").toString();
                         double lon = Double.valueOf(longitude);
                         double lat = Double.valueOf(latitude);
                         LatLng pos = new LatLng(lat, lon);
@@ -227,7 +210,6 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
 
                         String objNameDistance = objName + " | distance: " + String.format("%.3f", distance) + " km";
                         arrayList.add(objNameDistance);
-                        //System.out.println("object distance: " + object.getDistanceString());
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -243,22 +225,18 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
         queue_objects.add(request_objects);
 
         RequestQueue queue_cities = Volley.newRequestQueue(LeisureMap.this);
-        //String url_cities = "https://overpass-api.de/api/interpreter?data=[out:json][timeout:25];area(id:3600072596)-%3E.searchArea;(node[%22place%22=%22city%22](area.searchArea);way[%22place%22=%22city%22](area.searchArea);relation[%22place%22=%22city%22](area.searchArea););out%20body;%3E;out%20skel%20qt;";
         String url_cities = "http://193.219.91.103:16059/table?name=city";
         JsonObjectRequest request_cities = new JsonObjectRequest(Request.Method.GET, url_cities, null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
                 try {
                     JSONArray array = response.getJSONArray("Table");
-                    //JSONArray array = response.getJSONArray("elements");
                     for(int i = 0; i < array.length(); i++) {
                         JSONObject element = (JSONObject) array.get(i);
                         String latitude = element.get("lat").toString();
                         String longitude = element.get("lon").toString();
                         String cityName = element.get("name").toString();
                         String type = element.get("type").toString();
-                        //JSONObject obj = (JSONObject) element.get("tags");
-                        //String cityName = obj.get("name").toString();
                         double lon = Double.valueOf(longitude);
                         double lat = Double.valueOf(latitude);
                         LatLng pos = new LatLng(lat, lon);
@@ -336,7 +314,6 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
                     Intent intentObject = new Intent(getBaseContext(), ObjectPopUp.class);
                     for(Object o : objectList) {
                         if(title.equals(o.getName())) {
-                            //System.out.println(title + "    " + o.getName() + "    " + o.getCity());
                             intentObject.putExtra("Username", username);
                             intentObject.putExtra("UserStatus", isLoggedIn);
                             intentObject.putExtra("City", o.getCity());
@@ -349,22 +326,6 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
             }
         });
 
-        mapGps.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (userPos != null) {
-                    CircleOptions gps = new CircleOptions();
-                    gps.center(userPos);
-                    gps.radius(4);
-                    gps.fillColor(0x8800CCFF);
-                    gps.strokeColor(Color.BLUE);
-                    gps.strokeWidth(4.0f);
-                    gMap.addCircle(gps);
-                    CameraPosition cameraPosition = new CameraPosition.Builder().target(userPos).zoom(18).build();
-                    gMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-                }
-            }
-        });
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
 
@@ -392,15 +353,6 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
                 return itemSelected.trim();
             }
 
-            private void adjustGpsIconVisibility() {
-                if (listView.getVisibility() == View.INVISIBLE || listView.getVisibility() == View.GONE) {
-                    mapGps.setVisibility(View.VISIBLE);
-                }
-                else {
-                    mapGps.setVisibility(View.INVISIBLE);
-                }
-            }
-
             @Override
             public boolean onQueryTextSubmit(String s) {
                 String location = searchView.getQuery().toString();
@@ -410,7 +362,6 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
                         listView.setVisibility(View.INVISIBLE);
                         pointToPosition(m.getPosition());
                         gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(m.getPosition(), 10));
-                        adjustGpsIconVisibility();
                     }
                 }
                 for (Marker m : townMarkers) {
@@ -418,7 +369,6 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
                         listView.setVisibility(View.INVISIBLE);
                         pointToPosition(m.getPosition());
                         gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(m.getPosition(), 13));
-                        adjustGpsIconVisibility();
                     }
                 }
                 resetSelectedMarker();
@@ -430,7 +380,6 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
                             pointToPosition(currentMarker.getPosition());
                             gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentMarker.getPosition(), 15));
                             objectMarkers.add(currentMarker);
-                            adjustGpsIconVisibility();
                             clickedObjectId.add(o.getId());
                             clickedObjectType.add(o.getType());
                         }
@@ -452,7 +401,6 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
                                     pointToPosition(currentMarker.getPosition());
                                     gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentMarker.getPosition(), 15));
                                     objectMarkers.add(currentMarker);
-                                    adjustGpsIconVisibility();
                                     clickedObjectId.add(o.getId());
                                     clickedObjectType.add(o.getType());
                                 }
@@ -463,7 +411,6 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
                                 listView.setVisibility(View.INVISIBLE);
                                 pointToPosition(m.getPosition());
                                 gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(m.getPosition(), 10));
-                                adjustGpsIconVisibility();
                             }
                         }
                         for (Marker m : townMarkers) {
@@ -471,7 +418,6 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
                                 listView.setVisibility(View.INVISIBLE);
                                 pointToPosition(m.getPosition());
                                 gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(m.getPosition(), 13));
-                                adjustGpsIconVisibility();
                             }
                         }
                     }
@@ -501,12 +447,10 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
                 {
                     if (s.isEmpty()) {
                         listView.setVisibility(View.INVISIBLE);
-                        adjustGpsIconVisibility();
                     }
                     else {
                         listView.setVisibility(View.VISIBLE);
                         adapter.getFilter().filter(s);
-                        adjustGpsIconVisibility();
                     }
                 }
 
@@ -524,7 +468,6 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
                                     pointToPosition(currentMarker.getPosition());
                                     gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentMarker.getPosition(), 15));
                                     objectMarkers.add(currentMarker);
-                                    adjustGpsIconVisibility();
                                     clickedObjectId.add(o.getId());
                                     clickedObjectType.add(o.getType());
                                 }
@@ -535,7 +478,6 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
                                 pointToPosition(m.getPosition());
                                 listView.setVisibility(View.INVISIBLE);
                                 gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(m.getPosition(), 10));
-                                adjustGpsIconVisibility();
                             }
                         }
                         for (Marker m : townMarkers) {
@@ -543,11 +485,8 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
                                 pointToPosition(m.getPosition());
                                 listView.setVisibility(View.INVISIBLE);
                                 gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(m.getPosition(), 13));
-                                adjustGpsIconVisibility();
                             }
                         }
-//                        System.out.println("id listview nepilnai " + clickedObjectId);
-//                        System.out.println("id listview nepilnai " + clickedObjectType);
                     }
                 });
                 return false;
@@ -556,8 +495,6 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
 
 
         LatLng pos = getIntent().getParcelableExtra("Position");
-//        System.out.println(tempClickedObjectId);
-//        System.out.println(tempclickedObjectType);
 
         if(pos != null) {
             Handler handler = new Handler();
@@ -565,7 +502,6 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
                 public void run() {
                     for (Object o : objectList) {
                         LatLng pos2 = new LatLng(o.getLat(), o.getLon());
-                        //System.out.println("Pos1 = " + pos + " Pos2 = "  + pos2);
                         if(pos.equals(pos2)){
                             currentMarker = gMap.addMarker(new MarkerOptions().position(new LatLng(o.getLat(), o.getLon())).title(o.getName()).snippet(o.getType()).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
                             pointToPosition(currentMarker.getPosition());
@@ -726,6 +662,7 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        stopRoute = true;
         Intent intent = new Intent(this, ExitService.class);
         intent.putStringArrayListExtra("ID", clickedObjectId);
         intent.putStringArrayListExtra("Type", clickedObjectType);
@@ -833,8 +770,6 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
         handler.postDelayed(new Runnable() {
             public void run() {
                 if(polyline != null && !stopRoute) {
-                    System.out.println(stopRoute);
-                    System.out.println("Route redrawn");
                     userPos = newUserPos;
                     getCurrentLocation();
                     if(userPolyMarker != null)
@@ -846,11 +781,5 @@ public class LeisureMap extends AppCompatActivity implements OnMapReadyCallback 
                 }
             }
         }, 5000);
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        stopRoute = true;
     }
 }

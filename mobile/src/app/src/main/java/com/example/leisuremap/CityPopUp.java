@@ -63,7 +63,6 @@ public class CityPopUp extends AppCompatActivity {
             public void onClick(View view) {
                 RequestQueue queue = Volley.newRequestQueue(CityPopUp.this);
                 String url ="http://193.219.91.103:16059/weather?city=" + city;
-                //String url ="https://api.meteo.lt/v1/places/" + city + "/forecasts/long-term";
 
                 JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
                     @Override

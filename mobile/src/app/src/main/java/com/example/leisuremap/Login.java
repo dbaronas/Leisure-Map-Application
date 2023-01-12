@@ -1,10 +1,8 @@
 package com.example.leisuremap;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.AppCompatCheckBox;
 
 import android.app.Activity;
-import android.app.ActivityManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.method.HideReturnsTransformationMethod;
@@ -22,27 +20,12 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
-import com.google.android.gms.maps.model.LatLng;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.nio.charset.StandardCharsets;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
-import java.util.Base64;
 import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
 
 public class Login extends AppCompatActivity {
 
@@ -64,11 +47,7 @@ public class Login extends AppCompatActivity {
 
         b_login = findViewById(R.id.signIn);
         b_login.setOnClickListener(view -> {
-            try {
-                printInfo();
-            } catch (InvalidAlgorithmParameterException | IllegalBlockSizeException | NoSuchPaddingException | BadPaddingException | NoSuchAlgorithmException | InvalidKeyException e) {
-                e.printStackTrace();
-            }
+            printInfo();
         });
 
         b_change_pass = findViewById(R.id.changePass);
@@ -85,10 +64,8 @@ public class Login extends AppCompatActivity {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
                 if (isChecked) {
-                    // To hide password
                     password.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
                 } else {
-                    // To show password
                     password.setTransformationMethod(PasswordTransformationMethod.getInstance());
                 }
             }
@@ -99,10 +76,6 @@ public class Login extends AppCompatActivity {
 
     protected void onStart() {
         super.onStart();
-
-        //Date endTime = getIntent().getParcelableExtra("EndTime"); // getting session endTime
-        //Date endTime = new Date(System.currentTimeMillis());
-        //check if a user is logged in, if - yes, then move him to MainMenu
         SessionManagement sessionManagement = new SessionManagement(Login.this);
         String un = sessionManagement.getSessionUsername();
         String pw = sessionManagement.getSessionPassword();
@@ -111,25 +84,7 @@ public class Login extends AppCompatActivity {
         if (un != null && pw != null && st == true ) {
             Login login = new Login();
             login.moveToMainMenu();
-            //System.out.println("startTime: " + formatter.format(startTime));
-
-
-
         }
-//        else if (st != true && isAppRunning.isRunning() == true ) {
-//            Login login = new Login();
-//            login.moveToMainMenu();
-//        }
-//        else if (isRunning() == false) {
-//            SimpleDateFormat formatter= new SimpleDateFormat("HH:mm");
-//            Date endTime = new Date(System.currentTimeMillis());
-//            System.out.println("endTime: " + formatter.format(endTime));
-//        }
-        else {
-
-        }
-        //System.out.println(isRunning());
-
     }
 
     public void openForgotPass() {
@@ -142,7 +97,7 @@ public class Login extends AppCompatActivity {
         startActivity(intent);
     }
 
-    public void printInfo() throws InvalidAlgorithmParameterException, IllegalBlockSizeException, NoSuchPaddingException, BadPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+    public void printInfo() {
         String un = username.getText().toString();
         String pw = password.getText().toString();
         if(un.matches(""))
@@ -154,7 +109,6 @@ public class Login extends AppCompatActivity {
         }
     }
 
-    //client will send the data to the server in a form of url - GET request, query parameters will be present inside URL
     public void logIn(String username, String password) {
         RequestQueue queue = Volley.newRequestQueue(this);
         String url = "http://193.219.91.103:16059/user/login?username=" + username + "&pass=" + password;
@@ -163,12 +117,10 @@ public class Login extends AppCompatActivity {
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
-                //String message;
 
                 try {
                     JSONObject status = response.getJSONObject("STATUS");
                     isLoggedIn = (boolean) status.get("LOGIN");
-                    //message = (String) status.get("message");
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -180,7 +132,6 @@ public class Login extends AppCompatActivity {
                     Date startTime = new Date(System.currentTimeMillis());
                     String time = formatter.format(startTime);
                     intent.putExtra("startTime", time);
-                    //System.out.println("startTime" + startTime);
                     startActivity(intent);
                     MainMenu.fa.finish();
                     finish();
@@ -197,7 +148,6 @@ public class Login extends AppCompatActivity {
         queue.add(request);
     }
 
-    //log in to app and save the session of a user and move user to leisuremap activity
     public void saveLoggedInSession(View view){
         SessionManagement sessionManagement = new SessionManagement(Login.this);
         sessionManagement.saveSession(username.getText().toString(), password.getText().toString(), status);
@@ -206,10 +156,7 @@ public class Login extends AppCompatActivity {
 
     public void moveToMainMenu(){
         Intent intent = new Intent(Login.this, MainMenu.class);
-        //any existing task that are associated with the activity are cleared before the activity is started
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
     }
-
-
 }
