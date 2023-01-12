@@ -168,7 +168,7 @@ const searchSession = async (req, res) => {
     await new Promise(async (resolve, reject) => {
       for(let i = 0; i < places.length; i++){
         await new Promise((resolve, reject) => {
-          pool.query(`INSERT INTO searched_places (session_id, place_id, date) VALUES ($1, $2, $3)`, [lastId, places[i], date], (error, results) => {
+          pool.query(`INSERT INTO searched_places (session_id, place_id, date) VALUES ($1, $2, $3)`, [lastId, parseInt(places[i]), date], (error, results) => {
             if(error){
               throw error
             }
