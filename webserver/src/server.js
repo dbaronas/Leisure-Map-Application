@@ -50,8 +50,9 @@ app.post('/session', application.db.searchSession)
 //Recommendation
 app.get('/recommendation', application.recom.getRecommendation)
 
-app.listen(port, () => {
-    console.log(`App running on port ${port}.`)
+//Does not exist
+app.get('*', (req, res) => {
+  res.json({ERROR: `Route ${req.path} does not exist!`})
 })
 
-module.exports = app
+app.listen(port)
