@@ -4,7 +4,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.text.HtmlCompat;
 
 import android.content.Intent;
-import android.location.Location;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
@@ -64,7 +63,6 @@ public class CityPopUpActivity extends AppCompatActivity {
             public void onClick(View view) {
                 RequestQueue queue = Volley.newRequestQueue(CityPopUpActivity.this);
                 String url ="http://193.219.91.103:16059/weather?city=" + city;
-                //String url ="https://api.meteo.lt/v1/places/" + city + "/forecasts/long-term";
 
                 JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
                     @Override

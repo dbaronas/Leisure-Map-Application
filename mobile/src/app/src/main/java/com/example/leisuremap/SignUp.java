@@ -22,19 +22,6 @@ import com.android.volley.toolbox.Volley;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
-
-import java.nio.charset.StandardCharsets;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.util.Base64;
-
 public class SignUp extends AppCompatActivity {
 
     private Button b_sign_up;
@@ -51,11 +38,7 @@ public class SignUp extends AppCompatActivity {
 
         b_sign_up = findViewById(R.id.signUp);
         b_sign_up.setOnClickListener(view -> {
-            try {
-                printInfo();
-            } catch (NoSuchPaddingException | NoSuchAlgorithmException | InvalidAlgorithmParameterException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
-                e.printStackTrace();
-            }
+            printInfo();
         });
 
         guideText = findViewById(R.id.guide);
@@ -68,11 +51,9 @@ public class SignUp extends AppCompatActivity {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
                 if (isChecked) {
-                    // To hide password
                     password.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
                     password2.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
                 } else {
-                    // To show password
                     password.setTransformationMethod(PasswordTransformationMethod.getInstance());
                     password2.setTransformationMethod(PasswordTransformationMethod.getInstance());
                 }
@@ -80,7 +61,7 @@ public class SignUp extends AppCompatActivity {
         });
     }
 
-    public void printInfo() throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+    public void printInfo() {
         String un = username.getText().toString();
         String pw = password.getText().toString();
         String pw2 = password2.getText().toString();
@@ -98,7 +79,6 @@ public class SignUp extends AppCompatActivity {
         }
     }
 
-    //client will send the data to the server in a form of url - GET request, query parameters will be present inside URL
     public void signUp(String username, String password){
 
         RequestQueue queue = Volley.newRequestQueue(this);

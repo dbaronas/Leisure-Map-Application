@@ -7,10 +7,7 @@ import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.ActivityManager;
 import android.app.AlertDialog;
-import android.app.PendingIntent;
-import android.app.Service;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -22,23 +19,14 @@ import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
-import com.google.android.gms.common.internal.Constants;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
@@ -51,7 +39,6 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.DataOutputStream;
@@ -60,8 +47,6 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
 
 public class MainMenu extends AppCompatActivity {
 
@@ -146,7 +131,6 @@ public class MainMenu extends AppCompatActivity {
         b_sign_in.setOnClickListener(view -> openLogin());
         b_logOut = findViewById(R.id.logOut);
 
-        String startTime = getIntent().getStringExtra("startTime");
         b_logOut.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -175,7 +159,7 @@ public class MainMenu extends AppCompatActivity {
                             jsonObject.put("username", username);
                             jsonObject.put("start", startTime);
                             jsonObject.put("end", formatter.format(endTime));
-                            System.out.println(clickedObjectType);
+
                             for (String o : clickedObjectId) {
                                 jsonArrayId.put(o);
                             }
@@ -188,7 +172,6 @@ public class MainMenu extends AppCompatActivity {
 
                             Log.i("JSON", jsonObject.toString());
                             DataOutputStream os = new DataOutputStream(conn.getOutputStream());
-                            //os.writeBytes(URLEncoder.encode(jsonParam.toString(), "UTF-8"));
                             os.writeBytes(jsonObject.toString());
 
                             os.flush();
@@ -220,9 +203,7 @@ public class MainMenu extends AppCompatActivity {
             b_sign_in.setEnabled(false);
         }
 
-        if (isOnline() == true) { }
-
-        else {
+        if (!isOnline()) {
             try {
                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(MainMenu.this);
                 alertDialogBuilder.setTitle("Error")
@@ -245,14 +226,10 @@ public class MainMenu extends AppCompatActivity {
                 AlertDialog alert = alertDialogBuilder.create();
                 alert.show();
             } catch (Exception e) {
-                System.out.println("Show Dialog: " + e.getMessage());
+                e.printStackTrace();
             }
         }
-
     }
-
-
-
 
     public boolean isOnline() {
         ConnectivityManager conMgr = (ConnectivityManager) getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -291,14 +268,10 @@ public class MainMenu extends AppCompatActivity {
         if(requestCode == 0) {
             clickedObjectId.addAll(data.getStringArrayListExtra("result1"));
             clickedObjectType.addAll(data.getStringArrayListExtra("result2"));
-            System.out.println(clickedObjectId);
-            System.out.println(clickedObjectType);
         }
         if(requestCode == 1) {
             clickedObjectId.addAll(data.getStringArrayListExtra("result3"));
             clickedObjectType.addAll(data.getStringArrayListExtra("result4"));
-            System.out.println(clickedObjectId);
-            System.out.println(clickedObjectType);
         }
     }
 
@@ -401,7 +374,6 @@ public class MainMenu extends AppCompatActivity {
         intent.putExtra("Username", username);
         intent.putStringArrayListExtra("oID", clickedObjectId);
         intent.putStringArrayListExtra("oType", clickedObjectType);
-        //intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
         startActivityForResult(intent, 0);
     }
 
@@ -415,6 +387,7 @@ public class MainMenu extends AppCompatActivity {
         Intent intent = new Intent(this, SimilarUserRecommendations.class);
         intent.putExtra("UserStatus", isLoggedIn);
         intent.putExtra("Username", username);
+        intent.putExtra("UserPos", pos);
         startActivity(intent);
     }
 
@@ -457,15 +430,8 @@ public class MainMenu extends AppCompatActivity {
         SessionManagement sessionManagement = new SessionManagement(MainMenu.this);
         sessionManagement.removeSession();
         Intent intent = new Intent(MainMenu.this, MainMenu.class);
-        //any existing task that are associated with the activity are cleared before the activity is started
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
-
-        SimpleDateFormat formatter= new SimpleDateFormat("HH:mm");
-        Date endTime = new Date(System.currentTimeMillis());
-            //System.out.println("endTime: " + formatter.format(endTime));
-            //intent.putExtra("EndTime", formatter.format(endTime));
-
     }
 
     @Override

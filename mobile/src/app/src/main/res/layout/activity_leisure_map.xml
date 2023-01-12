@@ -30,14 +30,6 @@
         android:background="@color/white"
         android:layout_below="@+id/sv_location"/>
     
-    <ImageView
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:id="@+id/ic_gps"
-        android:layout_below="@+id/sv_location"
-        android:scaleType="centerCrop"
-        android:src="@drawable/ic_gps"/>
-
 
 
 </RelativeLayout>

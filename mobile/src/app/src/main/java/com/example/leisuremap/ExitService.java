@@ -7,11 +7,9 @@ import android.os.IBinder;
 import androidx.annotation.Nullable;
 import java.util.ArrayList;
 
-
 public class ExitService extends Service {
     ArrayList<String> IDs;
     ArrayList<String> Types;
-
 
     @Nullable
     @Override

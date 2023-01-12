@@ -9,7 +9,6 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -95,7 +94,6 @@ public class SimilarUserRecommendations extends AppCompatActivity {
                 }
                 sortList();
                 for(Object o:objects) {
-                    System.out.println(o);
                     createTextViews(o);
                 }
             }
@@ -131,7 +129,7 @@ public class SimilarUserRecommendations extends AppCompatActivity {
                 intent.putExtra("UserPos", userPos);
                 intent.putExtra("Username", username);
                 intent.putExtra("UserStatus", isLoggedIn);
-                startActivity(intent);
+                startActivityForResult(intent, 6);
             }
         });
         linearLayout.addView(textView);

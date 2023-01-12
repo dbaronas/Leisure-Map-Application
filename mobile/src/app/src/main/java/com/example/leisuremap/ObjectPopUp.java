@@ -4,7 +4,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.method.ScrollingMovementMethod;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.widget.Button;
@@ -33,7 +32,6 @@ public class ObjectPopUp extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        //getSupportActionBar().hide();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_object_pop_up);
 
@@ -48,7 +46,6 @@ public class ObjectPopUp extends AppCompatActivity {
         Intent intent = new Intent();
         String city = getIntent().getStringExtra("City");
         String id = getIntent().getStringExtra("Id");
-        //System.out.println(id);
         isLoggedIn = checkUserStatus();
         username = checkUsername();
 
@@ -72,7 +69,6 @@ public class ObjectPopUp extends AppCompatActivity {
                 public void onClick(View v) {
                     float rating = ratingBar.getRating();
                     RequestQueue queue = Volley.newRequestQueue(ObjectPopUp.this);
-                    System.out.println(id);
                     String url = "http://193.219.91.103:16059/rateplace?id=" + id + "&rating=" + rating;
                     JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
                         @Override
@@ -121,7 +117,6 @@ public class ObjectPopUp extends AppCompatActivity {
             public void onClick(View view) {
                 RequestQueue queue = Volley.newRequestQueue(ObjectPopUp.this);
                 String url ="http://193.219.91.103:16059/weather?city=" + city;
-                //String url ="https://api.meteo.lt/v1/places/" + city + "/forecasts/long-term";
 
                 JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
                     @Override

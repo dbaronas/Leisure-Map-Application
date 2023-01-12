@@ -53,7 +53,7 @@ public class FindActivities extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_find_activities);
 
-        userPos = getIntent().getParcelableExtra("UserPos"); // getting user position
+        userPos = getIntent().getParcelableExtra("UserPos");
         Activity a = this;
         if(a.getCallingActivity().getClassName().toString().equals("com.example.leisuremap.MainMenu")){
             clickedObjectId.clear();
@@ -92,13 +92,11 @@ public class FindActivities extends AppCompatActivity {
 
 
         RequestQueue queue_objects = Volley.newRequestQueue(FindActivities.this);
-        //String url_museums = "https://overpass-api.de/api/interpreter?data=%2F*%0AThis%20has%20been%20generated%20by%20the%20overpass-turbo%20wizard.%0AThe%20original%20search%20was%3A%0A%E2%80%9Ctourism%3Dmuseum%20in%20lithuania%E2%80%9D%0A*%2F%0A%5Bout%3Ajson%5D%5Btimeout%3A25%5D%3B%0A%2F%2F%20fetch%20area%20%E2%80%9Clithuania%E2%80%9D%20to%20search%20in%0Aarea%28id%3A3600072596%29-%3E.searchArea%3B%0A%2F%2F%20gather%20results%0A%28%0A%20%20%2F%2F%20query%20part%20for%3A%20%E2%80%9Ctourism%3Dmuseum%E2%80%9D%0A%20%20node%5B%22tourism%22%3D%22museum%22%5D%28area.searchArea%29%3B%0A%20%20way%5B%22tourism%22%3D%22museum%22%5D%28area.searchArea%29%3B%0A%20%20relation%5B%22tourism%22%3D%22museum%22%5D%28area.searchArea%29%3B%0A%29%3B%0A%2F%2F%20print%20results%0Aout%20body%3B%0A%3E%3B%0Aout%20skel%20qt%3B";
         String url_objects = "http://193.219.91.103:16059/view?name=places";
         JsonObjectRequest request_objects = new JsonObjectRequest(Request.Method.GET, url_objects, null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
                 try {
-                    //JSONArray array = response.getJSONArray("elements");
                     JSONArray array = response.getJSONArray("Table");
                     for(int i = 0; i < array.length(); i++) {
                         JSONObject element = (JSONObject) array.get(i);
@@ -108,8 +106,6 @@ public class FindActivities extends AppCompatActivity {
                         double lon = Double.valueOf(longitude);
                         double lat = Double.valueOf(latitude);
                         LatLng pos = new LatLng(lat, lon);
-                        //JSONObject json_obj = (JSONObject) element.get("tags");
-                        //String objName = json_obj.get("name").toString();
                         String objType = element.get("type").toString();
                         String objName = element.get("name").toString();
                         String rating = element.get("rating").toString();
@@ -195,7 +191,7 @@ public class FindActivities extends AppCompatActivity {
                     String distNumbersOnly = distance.replaceAll("[^0-9]", "");
                     chosenDist = Integer.parseInt(distNumbersOnly);
                 } else
-                    chosenDist = 400; //if nothing was selected all object would appear (highest possible distance in Lithuania)
+                    chosenDist = 500; // to display all objects
 
                 int chosenRating;
                 if (!spinner2.getSelectedItem().toString().matches("Choose rating")) {
@@ -203,7 +199,7 @@ public class FindActivities extends AppCompatActivity {
                     String ratingNumbersOnly = rating.replaceAll("[^0-9]", "");
                     chosenRating = Integer.parseInt(ratingNumbersOnly);
                 } else
-                    chosenRating = 1; //if nothing was selected all object would appear (lowest possible rating)
+                    chosenRating = 1; // to display all objects
 
                 ArrayList<String> chosenCities = new ArrayList<>();
                 for (SpinnerState s : listVOsCities) {
@@ -229,8 +225,6 @@ public class FindActivities extends AppCompatActivity {
         if(requestCode == 3) {
             clickedObjectId.addAll(data.getStringArrayListExtra("result3"));
             clickedObjectType.addAll(data.getStringArrayListExtra("result4"));
-            System.out.println(clickedObjectId);
-            System.out.println(clickedObjectType);
         }
     }
 
@@ -271,9 +265,6 @@ public class FindActivities extends AppCompatActivity {
             public void onClick(View view) {
                 clickedObjectId.add(id);
                 clickedObjectType.add(type);
-                System.out.println(clickedObjectId);
-                System.out.println("----------------------------------------------------------------");
-                System.out.println(clickedObjectType);
                 Intent intent = new Intent(getBaseContext(), LeisureMap.class);
                 intent.putExtra("Position", pos);
                 intent.putExtra("UserPos", userPos);
@@ -283,11 +274,8 @@ public class FindActivities extends AppCompatActivity {
                 intent.putStringArrayListExtra("oType", clickedObjectType);
                 intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                 startActivityForResult(intent, 3);
-//                System.out.println(clickedObjectId);
-//                System.out.println(clickedObjectType);
             }
         });
-        //is sito siust masyva i leisuremap
         linearLayout.addView(textView);
     }
 
@@ -308,20 +296,14 @@ public class FindActivities extends AppCompatActivity {
         finish();
     }
 
-//    @Override
-//    protected void onResume() {
-//        super.onResume();
-//        clickedObjectId = getIntent().getStringArrayListExtra("objectID1");
-//        clickedObjectType = getIntent().getStringArrayListExtra("objectType1");
-//    }
-@Override
-protected void onDestroy() {
-    super.onDestroy();
-    Intent intent = new Intent(this, ExitService.class);
-    intent.putStringArrayListExtra("ID", clickedObjectId);
-    intent.putStringArrayListExtra("Type", clickedObjectType);
-    startService(intent);
-}
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Intent intent = new Intent(this, ExitService.class);
+        intent.putStringArrayListExtra("ID", clickedObjectId);
+        intent.putStringArrayListExtra("Type", clickedObjectType);
+        startService(intent);
+    }
 
     public boolean checkUserStatus() {
         return getIntent().getBooleanExtra("UserStatus", false);
