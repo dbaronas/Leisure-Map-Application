@@ -17,9 +17,11 @@ app.use(
 app.get('/user/login', middleware.limiter.limiter, application.user.login)
 app.get('/user/create', middleware.limiter.limiter2, application.user.createUser)
 app.get('/user/update', middleware.limiter.limiter2, application.user.updateUser)
-app.get('/user/delete', application.user.deleteUser)
 
 //Update Overpass API
+//TODO 
+// implement functions in a different way because Overpass sometimes sends XML data instead of JSON
+// merge functions into one
 app.get('/update/overpassapi/cities', application.overpass.updateCities)
 app.get('/update/overpassapi/leisure', application.overpass.updateLeisure)
 app.get('/update/overpassapi/restaurants', application.overpass.updateRestaurant)
@@ -48,8 +50,9 @@ app.post('/session', application.db.searchSession)
 //Recommendation
 app.get('/recommendation', application.recom.getRecommendation)
 
-app.listen(port, () => {
-    console.log(`App running on port ${port}.`)
+//Does not exist
+app.get('*', (req, res) => {
+  res.json({ERROR: `Route ${req.path} does not exist!`})
 })
 
-module.exports = app
+app.listen(port)

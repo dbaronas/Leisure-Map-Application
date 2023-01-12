@@ -43,18 +43,24 @@ const createUser = (req, res) => {
 
   pool.query(`SELECT EXISTS(SELECT 1 FROM users WHERE username='${username}')`, (error, results) => {
         if(results.rows[0].exists == false){
-        pool.query('INSERT INTO users (username, password) VALUES ($1, $2)', [username, pass], (error, results) => {
+        pool.query('INSERT INTO users (username, password) VALUES ($1, $2)', [username, pass], async(error, results) => {
             if (error) {
               res.send(error)
             }
             else{
-              for(let i = 1; i <= 45; i++){
-                pool.query(`INSERT INTO searched_tags (tag_id, username, count) VALUES (${i}, '${username}', ${getRandomInt(50)})`, (error, results) => {
-                  if(error){
-                    throw error
-                  }
-                })
-              }
+              await new Promise(async (resolve, reject) => {
+                for(let i = 1; i <= 45; i++){
+                  await new Promise((resolve, reject) => {
+                    pool.query(`INSERT INTO searched_tags (tag_id, username, count) VALUES (${i}, '${username}', 0)`, (error, results) => {
+                      if(error){
+                        throw error
+                      }
+                      resolve()
+                    })
+                  })
+                }
+                resolve()
+              })
               const STATUS = {
                 SIGNUP: true,
                 message: 'Account successfully created'
@@ -72,9 +78,6 @@ const createUser = (req, res) => {
         }})
 
   }
-function getRandomInt(max) {
-    return Math.floor(Math.random() * max);
-}
   
 const updateUser = (req, res) => {
     const data = req.query.username
@@ -83,6 +86,9 @@ const updateUser = (req, res) => {
     const newpass = req.query.newpass
 
     pool.query(`SELECT password FROM users WHERE username = '${username}'`, (error, results) => {
+      if(error){
+        throw error
+      }
       if(bcrypt.compareSync(oldpass, results.rows[0].password) == true){
         pool.query(
           'UPDATE users SET password = $1 WHERE username = $2', [newpass, username], (error, results) => {
@@ -110,22 +116,8 @@ const updateUser = (req, res) => {
   
 }
   
-const deleteUser = (req, res) => {
-  const data = req.query.username
-  const username = data.toLowerCase()
-  
-    pool.query('DELETE FROM users WHERE username = $1', [username], (error, results) => {
-      if (error) {
-        res.send(error)
-        return
-      }
-      res.json({STATUS: 'Account deleted successfully'})
-    })
-}
-
 module.exports = {
     login,
     createUser,
     updateUser,
-    deleteUser,
 }
