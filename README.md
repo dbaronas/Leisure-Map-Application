@@ -1,3 +1,3 @@
-# GIS
+Leisure Map Mobile Application
 
-Kernel Technologies awesome project!
+The objective of this project was to create an Android application enabling users to effortlessly discover the most suitable leisure destinations for their free time. This was achieved by implementing algorithms that analyze user information and relevant data. The application offers various features including filtering, searching, checking weather forecasts, saving preferred locations, exploring searches of similar users, identifying the quickest routes to destinations, and determining distances. These functionalities aim to empower users to make informed and swift decisions about how to spend their leisure time effectively.
